@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>瓶蓋大戰 V6.4.3</title>
+<title>瓶蓋大戰 V6.4.4</title>
 <style>
 *{box-sizing:border-box;user-select:none;touch-action:none}body{margin:0;background:#050505;color:white;font-family:Arial,"Microsoft JhengHei",sans-serif}#game{width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}#top{height:46px;background:#1f2937;padding:6px 8px;display:flex;justify-content:space-between;align-items:center}button{background:#2563eb;color:white;border:0;border-radius:8px;padding:6px 9px;font-size:13px}#world{flex:1;position:relative;background:#020202;overflow:hidden}#board{position:absolute;width:min(94vw,74vh);height:min(94vw,74vh);left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#a66b32,#3b2412);border:8px solid #5b3518}.obstacle{position:absolute;background:#4b5563;border:4px solid #d1d5db;border-radius:12px;z-index:2}.anchorMarker{position:absolute;min-width:46px;height:28px;padding:0 5px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:white;background:rgba(14,165,233,.85);border:2px solid #bae6fd;z-index:60;filter:drop-shadow(0 0 5px #38bdf8);pointer-events:auto;cursor:pointer}.cap{position:absolute;width:34px;height:34px;border-radius:50%;border:3px solid #111;background:white;color:#111;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;z-index:3;box-shadow:inset 0 0 7px #888,0 3px 8px #000}.status{position:absolute;font-size:14px;z-index:4;pointer-events:none;text-shadow:0 0 5px black}.cap.current{outline:3px solid yellow;box-shadow:0 0 15px yellow,inset 0 0 7px #888}.dead{opacity:.25;filter:grayscale(1)}.hidden{opacity:.12;filter:blur(1px)}#panel{height:118px;background:#111827;padding:6px;display:flex;gap:6px;overflow-x:auto;overflow-y:hidden}.card{min-width:155px;border:2px solid #6b7280;border-radius:9px;padding:6px;font-size:11px;transition:.15s}
 .card.skill-normal{background:#4b5563;border-color:#9ca3af}
@@ -283,7 +283,7 @@
 .skillMeta{font-size:11px;color:#fde68a;line-height:1.2}.skillDesc{font-size:11px;line-height:1.25;max-height:30px;overflow:hidden}.card b{white-space:normal;line-height:1.15;display:block;min-height:28px}.skillTip{font-size:10px;color:#cbd5e1}
 
 
-/* V6.3：更新紀錄、橫向地圖、瓶蓋描邊、新箭頭 */
+/* V6.3：更新紀錄、橫向地圖、描邊、新箭頭 */
 #updatePage{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:none;align-items:center;justify-content:center;color:white}
 .updateBox{width:min(92vw,760px);max-height:88vh;background:rgba(17,24,39,.96);border:2px solid #475569;border-radius:22px;padding:24px;box-shadow:0 0 35px #000;overflow:auto}
 #board{width:min(92vw,calc((100vh - 270px)*1.55))!important;height:min(calc(100vh - 285px),calc(92vw / 1.55))!important;max-width:1100px;max-height:620px}
@@ -369,8 +369,8 @@
 <body>
 <div id="startMenu">
   <div class="menuBox">
-    <h1 class="menuTitle">瓶蓋大戰 V6.4.3 Github 測試</h1>
-    <div class="menuSub">V6.4.3｜技能圖標背景放大更新。</div>
+    <h1 class="menuTitle">瓶蓋大戰 V6.4.4 Alpha</h1>
+    <div class="menuSub">V6.4.4｜開發中</div>
     <div class="menuBtns">
       <button onclick="startGameFromMenu()">開始遊戲</button>
       <button onclick="openSkillCatalog()">技能目錄</button>
@@ -387,7 +387,7 @@
     <div class="menuSub">選完地圖後會開始抽技能動畫。</div>
     <div id="mapGrid" class="mapGrid"></div>
     <div class="aiSetupBox">
-      <div class="aiSetupTitle">AI 設定（遊玩前設定）</div>
+      <div class="aiSetupTitle">AI 設定</div>
       <div class="aiSetupRow">
         <span>P2～P4：</span>
         <select id="aiDifficulty">

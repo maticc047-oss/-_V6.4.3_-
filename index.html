@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>瓶蓋大戰 V6.4.3</title>
+<style>
+*{box-sizing:border-box;user-select:none;touch-action:none}body{margin:0;background:#050505;color:white;font-family:Arial,"Microsoft JhengHei",sans-serif}#game{width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}#top{height:46px;background:#1f2937;padding:6px 8px;display:flex;justify-content:space-between;align-items:center}button{background:#2563eb;color:white;border:0;border-radius:8px;padding:6px 9px;font-size:13px}#world{flex:1;position:relative;background:#020202;overflow:hidden}#board{position:absolute;width:min(94vw,74vh);height:min(94vw,74vh);left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#a66b32,#3b2412);border:8px solid #5b3518}.obstacle{position:absolute;background:#4b5563;border:4px solid #d1d5db;border-radius:12px;z-index:2}.anchorMarker{position:absolute;min-width:46px;height:28px;padding:0 5px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:white;background:rgba(14,165,233,.85);border:2px solid #bae6fd;z-index:60;filter:drop-shadow(0 0 5px #38bdf8);pointer-events:auto;cursor:pointer}.cap{position:absolute;width:34px;height:34px;border-radius:50%;border:3px solid #111;background:white;color:#111;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;z-index:3;box-shadow:inset 0 0 7px #888,0 3px 8px #000}.status{position:absolute;font-size:14px;z-index:4;pointer-events:none;text-shadow:0 0 5px black}.cap.current{outline:3px solid yellow;box-shadow:0 0 15px yellow,inset 0 0 7px #888}.dead{opacity:.25;filter:grayscale(1)}.hidden{opacity:.12;filter:blur(1px)}#panel{height:118px;background:#111827;padding:6px;display:flex;gap:6px;overflow-x:auto;overflow-y:hidden}.card{min-width:155px;border:2px solid #6b7280;border-radius:9px;padding:6px;font-size:11px;transition:.15s}
+.card.skill-normal{background:#4b5563;border-color:#9ca3af}
+.card.skill-enhance{background:#5b21b6;border-color:#c084fc}
+.card.skill-calm{background:#1d4ed8;border-color:#60a5fa}
+.card.skill-ultimate{background:#15803d;border-color:#4ade80}
+.card.skill-rainbow{background:linear-gradient(90deg,#ff4040,#ffae00,#ffee00,#00ff66,#00c8ff,#6666ff,#d946ef);border-color:#fff}
+.card.skill-cosmic{background:linear-gradient(135deg,#0f172a,#312e81,#7c3aed,#2563eb);border-color:#a78bfa;box-shadow:0 0 18px #8b5cf6}.skillItem.skill-normal,.drawCard.skill-normal{background:#4b5563;border-color:#9ca3af}.skillItem.skill-enhance,.drawCard.skill-enhance{background:#5b21b6;border-color:#c084fc}.skillItem.skill-calm,.drawCard.skill-calm{background:#1d4ed8;border-color:#60a5fa}.skillItem.skill-ultimate,.drawCard.skill-ultimate{background:#15803d;border-color:#4ade80}.skillItem.skill-rainbow,.drawCard.skill-rainbow{background:linear-gradient(90deg,#ff4040,#ffae00,#ffee00,#00ff66,#00c8ff,#6666ff,#d946ef);border-color:#fff}.skillItem.skill-cosmic,.drawCard.skill-cosmic{background:linear-gradient(135deg,#0f172a,#312e81,#7c3aed,#2563eb);border-color:#a78bfa;box-shadow:0 0 18px #8b5cf6}.card.usable{cursor:pointer}.card.usable:hover{filter:brightness(1.18);transform:translateY(-2px)}.card.passiveCard{opacity:.9}.priority{font-size:10px;color:#facc15}.passive{font-size:10px;color:#86efac}.skillIcon{font-size:25px;text-align:center;background:#111827;border-radius:7px;margin:3px 0;padding:4px}#log{height:48px;overflow:auto;background:#000;padding:5px;font-size:12px}#arrow{position:absolute;height:6px;background:#facc15;box-shadow:0 0 12px #facc15;transform-origin:left center;display:none;z-index:5}#arrow:after{content:"";position:absolute;right:-12px;top:-7px;border-left:16px solid #facc15;border-top:10px solid transparent;border-bottom:10px solid transparent}.fxText{position:absolute;z-index:8;font-size:18px;font-weight:bold;text-shadow:0 0 8px black;animation:floatUp 1s forwards;pointer-events:none}@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-45px) scale(1.25)}}.ring{position:absolute;border:4px solid #38bdf8;border-radius:50%;animation:ring .6s forwards;pointer-events:none;z-index:4}@keyframes ring{from{opacity:1;transform:scale(.2)}to{opacity:0;transform:scale(2.8)}}.shockwave{position:absolute;border:8px solid #22ff55;border-radius:50%;pointer-events:none;z-index:15;animation:shockWave .7s ease-out forwards;box-shadow:0 0 25px #22ff55,0 0 50px #22ff55,inset 0 0 20px #22ff55}@keyframes shockWave{0%{width:40px;height:40px;margin-left:-20px;margin-top:-20px;opacity:1}100%{width:520px;height:520px;margin-left:-260px;margin-top:-260px;opacity:0}}.mine{position:absolute;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#111 0%,#000 65%,#262626 100%);border:3px solid #0a0a0a;z-index:4;box-shadow:0 2px 8px #000,inset 0 0 7px #555;display:flex;align-items:center;justify-content:center;pointer-events:none}.mine:after{content:'';width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444,0 0 14px #dc2626;animation:mineBlink .55s infinite alternate}@keyframes mineBlink{from{opacity:.35;transform:scale(.7)}to{opacity:1;transform:scale(1.35)}}#turnBanner,#winBox,#shieldBox{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);background:rgba(0,0,0,.88);padding:18px 28px;border-radius:16px;z-index:40;text-align:center}#turnBanner{font-size:30px;font-weight:bold;display:none;z-index:20}#duelBanner{position:absolute;left:50%;top:35%;transform:translate(-50%,-50%);font-size:52px;font-weight:900;color:#ef4444;text-shadow:0 0 12px #000,0 0 22px #dc2626;z-index:50;display:none;pointer-events:none;animation:duelFlash 1.4s ease-out forwards}@keyframes duelFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.08)}}#winBox,#shieldBox{display:none}#help{display:none;position:absolute;inset:0;background:rgba(0,0,0,.92);z-index:30;padding:15px;overflow:auto}#helpBox{max-width:760px;margin:auto;background:#1f2937;border-radius:15px;padding:18px}
+.timeTrail{position:absolute;width:34px;height:34px;border-radius:50%;border:3px solid #4fc3ff;opacity:.55;pointer-events:none;animation:trail .45s linear forwards;z-index:7}@keyframes trail{from{opacity:.6;transform:scale(1)}to{opacity:0;transform:scale(.7)}}.timeFlash{position:absolute;width:90px;height:90px;border-radius:50%;border:5px solid #66ccff;animation:timeFlash .55s forwards;pointer-events:none;z-index:7}@keyframes timeFlash{from{transform:scale(.2);opacity:1}to{transform:scale(2.5);opacity:0}}
+#startMenu,#skillCatalog,#rulePage,#recipePage{position:fixed;inset:0;background:radial-gradient(circle at center,#111827 0%,#020617 65%,#000 100%);z-index:9999;display:flex;align-items:center;justify-content:center;color:white}
+.menuBox,.catalogBox,.ruleBox,.recipeBox{width:min(92vw,720px);max-height:88vh;background:rgba(17,24,39,.96);border:2px solid #374151;border-radius:22px;padding:26px;box-shadow:0 0 35px #000;text-align:center}
+.menuTitle{font-size:42px;font-weight:900;margin:0 0 8px;text-shadow:0 0 16px #38bdf8}
+.menuSub{color:#cbd5e1;margin-bottom:22px}.menuBtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}.menuBtns button{font-size:20px;padding:13px 28px;border-radius:14px}.catalogBox,.ruleBox,.recipeBox{text-align:left;overflow:auto}.catalogTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.catalogTop h2{margin:0;font-size:28px}.skillList{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.skillItem{background:#263244;border:1px solid #4b5563;border-radius:12px;padding:10px;cursor:pointer;transition:.15s}.skillItem:hover{filter:brightness(1.18);transform:translateY(-2px)}.skillItem b{font-size:15px}.skillItem .icon{font-size:28px;text-align:center;margin:4px 0}.skillItem small{color:#facc15}.skillItem p{margin:4px 0 0;color:#e5e7eb;font-size:13px;line-height:1.35}.skillItem .guide{display:none;background:#111827;border-radius:8px;padding:7px;margin-top:8px;color:#d1fae5}.skillItem.open .guide{display:block}.ruleList{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.ruleCard{background:#263244;border:1px solid #4b5563;border-radius:12px;padding:12px;line-height:1.45}.ruleCard b{color:#facc15}.ruleCard p{margin:6px 0 0;color:#e5e7eb;font-size:13px}
+#skillCatalog,#rulePage,#recipePage,#updatePage{display:none}
+#drawOverlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9998;display:none;align-items:center;justify-content:center;color:white}.drawBox{width:min(92vw,760px);background:#111827;border:2px solid #374151;border-radius:22px;padding:24px;text-align:center;box-shadow:0 0 35px #000}.drawTitle{font-size:34px;font-weight:900;margin-bottom:12px;color:#facc15}.drawPlayer{font-size:24px;font-weight:bold;margin:8px 0 14px}.drawCards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.drawCard{width:150px;min-height:120px;background:#374151;border:2px solid #6b7280;border-radius:14px;padding:10px;animation:cardPop .35s ease-out;transition:.15s}.drawIcon{font-size:34px;background:#0f172a;border-radius:10px;padding:8px;margin:6px 0}.drawRolling{animation:rolling .15s linear infinite}.drawDone{border-color:#facc15;box-shadow:0 0 16px #facc15}@keyframes cardPop{from{transform:scale(.6) rotate(-4deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}@keyframes rolling{0%{filter:hue-rotate(0deg);transform:translateY(0)}50%{transform:translateY(-3px)}100%{filter:hue-rotate(80deg);transform:translateY(0)}}
+@media(max-width:700px){.menuTitle{font-size:32px}.menuBtns button{font-size:16px;padding:11px 18px}.catalogTop h2{font-size:22px}.skillList{grid-template-columns:1fr}.menuBox,.catalogBox,.ruleBox,.recipeBox{padding:18px}.drawCard{width:120px}.drawTitle{font-size:26px}}
+
+/* skill tier visual effects */
+.card,.skillItem,.drawCard{position:relative;overflow:hidden}
+.card.skill-enhance,.skillItem.skill-enhance,.drawCard.skill-enhance{
+  border-color:#e9d5ff!important;
+  box-shadow:0 0 8px #c084fc,0 0 18px #9333ea,0 0 30px #7e22ce;
+  animation:magicPulse 1.7s ease-in-out infinite;
+}
+.card.skill-enhance::before,.skillItem.skill-enhance::before,.drawCard.skill-enhance::before{
+  content:"";position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;
+  background:conic-gradient(from 0deg,transparent 0 20%,rgba(216,180,254,.9) 28%,transparent 36% 58%,rgba(147,51,234,.95) 66%,transparent 74% 100%);
+  opacity:.55;animation:magicSpin 2.2s linear infinite;
+}
+.card.skill-enhance>* , .skillItem.skill-enhance>* , .drawCard.skill-enhance>*{position:relative;z-index:1}
+.card.skill-calm,.skillItem.skill-calm,.drawCard.skill-calm{
+  background:#1e40af!important;
+  border-color:#7dd3fc!important;
+  box-shadow:0 0 9px #38bdf8, inset 0 0 14px rgba(125,211,252,.28);
+}
+.card.skill-calm::after,.skillItem.skill-calm::after,.drawCard.skill-calm::after{
+  content:"";position:absolute;left:-60%;top:8%;width:220%;height:84%;pointer-events:none;opacity:.38;
+  background:repeating-linear-gradient(100deg,transparent 0 12px,rgba(191,239,255,.75) 13px 15px,transparent 16px 30px);
+  animation:windFlow 1.6s linear infinite;
+}
+.card.skill-calm>* , .skillItem.skill-calm>* , .drawCard.skill-calm>*{position:relative;z-index:1}
+@keyframes magicPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.16)}}
+@keyframes magicSpin{to{transform:rotate(360deg)}}
+@keyframes windFlow{from{transform:translateX(-18px)}to{transform:translateX(34px)}}
+
+/* synthesis + ultimate update */
+#skillCards{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;flex:1;min-width:0}
+.synthBox{width:170px;min-width:170px;border:2px dashed #facc15;border-radius:12px;background:rgba(250,204,21,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:11px;color:#fde68a;padding:6px;box-shadow:inset 0 0 12px rgba(250,204,21,.18)}
+.synthBox.dragOver{background:rgba(250,204,21,.18);box-shadow:0 0 16px #facc15,inset 0 0 18px rgba(250,204,21,.25)}
+.synthList{font-size:10px;color:white;margin:3px 0;line-height:1.25}.synthHint{font-size:9px;color:#d1d5db}.synthBtn{margin-top:3px;background:#7c3aed;font-size:10px;padding:4px 6px}
+.card.skill-ultimate,.skillItem.skill-ultimate,.drawCard.skill-ultimate{background:#15803d!important;border-color:#86efac!important;box-shadow:0 0 10px #4ade80,0 0 22px #16a34a;animation:ultimateGlow 1.5s ease-in-out infinite}
+.card[draggable=true]{cursor:grab}.card[draggable=true]:active{cursor:grabbing;filter:brightness(1.25)}
+.obstacle{box-shadow:inset 0 0 10px rgba(255,255,255,.22),0 7px 12px rgba(0,0,0,.45)}
+.cap{background:radial-gradient(circle at 35% 28%,#ffffff 0%,#f8fafc 38%,#cbd5e1 70%,#94a3b8 100%)!important;border:3px solid #0f172a!important;box-shadow:inset -4px -5px 10px rgba(15,23,42,.35),inset 3px 3px 7px rgba(255,255,255,.9),0 4px 10px rgba(0,0,0,.55)!important}
+.cap:after{content:"";position:absolute;width:17px;height:17px;border-radius:50%;border:2px solid rgba(15,23,42,.18);pointer-events:none}
+.objectMoveTip{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:80;background:rgba(0,0,0,.82);border:2px solid #a78bfa;border-radius:12px;padding:8px 12px;color:white;font-size:13px;box-shadow:0 0 14px #7c3aed}
+@keyframes ultimateGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2)}}
+
+
+
+
+/* small visual polish: bottle caps, obstacles, tier cards */
+.cap{
+  background:radial-gradient(circle at 35% 28%,#ffffff 0%,#f8fafc 38%,#d1d5db 72%,#9ca3af 100%)!important;
+  border:3px solid #1f2937!important;
+  box-shadow:inset 0 0 5px #ffffff,inset 0 -6px 10px rgba(0,0,0,.22),0 4px 9px rgba(0,0,0,.65)!important;
+}
+.cap:after{
+  content:"";position:absolute;inset:6px;border-radius:50%;border:1px solid rgba(0,0,0,.18);pointer-events:none;
+}
+.cap.current{
+  outline:3px solid #facc15!important;
+  box-shadow:0 0 16px #facc15,inset 0 0 5px #fff,inset 0 -6px 10px rgba(0,0,0,.22),0 4px 9px rgba(0,0,0,.65)!important;
+}
+.obstacle{
+  background:linear-gradient(145deg,#6b7280 0%,#374151 45%,#111827 100%)!important;
+  border:4px solid #cbd5e1!important;
+  box-shadow:inset 4px 4px 8px rgba(255,255,255,.18),inset -5px -5px 10px rgba(0,0,0,.4),0 6px 12px rgba(0,0,0,.55)!important;
+}
+.card.skill-normal,.skillItem.skill-normal,.drawCard.skill-normal{
+  box-shadow:inset 0 0 10px rgba(255,255,255,.08),0 3px 7px rgba(0,0,0,.35);
+}
+.card.skill-enhance,.skillItem.skill-enhance,.drawCard.skill-enhance{
+  box-shadow:0 0 6px #c084fc,0 0 14px #9333ea,inset 0 0 10px rgba(233,213,255,.16)!important;
+}
+.card.skill-calm,.skillItem.skill-calm,.drawCard.skill-calm{
+  background:#1d4ed8!important;
+  box-shadow:0 0 6px #38bdf8,0 0 13px rgba(56,189,248,.55),inset 0 0 13px rgba(191,239,255,.18)!important;
+}
+.drawCard.drawDone{
+  transform:scale(1.03);
+}
+
+
+
+/* map selection */
+#mapSelect{position:fixed;inset:0;background:radial-gradient(circle at center,#0f172a 0%,#020617 70%,#000 100%);z-index:9999;display:none;align-items:center;justify-content:center;color:white}
+.mapBox{width:min(94vw,900px);max-height:90vh;background:rgba(17,24,39,.97);border:2px solid #334155;border-radius:22px;padding:22px;box-shadow:0 0 35px #000;text-align:center;overflow:auto}
+.mapTitle{font-size:34px;font-weight:900;margin:0 0 8px;color:#facc15;text-shadow:0 0 14px #92400e}.mapGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0}.mapCard{background:#263244;border:2px solid #475569;border-radius:16px;padding:12px;cursor:pointer;transition:.15s;min-height:118px;text-align:left}.mapCard:hover{transform:translateY(-3px);filter:brightness(1.18);box-shadow:0 0 16px #38bdf8}.mapIcon{font-size:32px;text-align:center;margin-bottom:6px}.mapCard b{font-size:17px}.mapCard p{font-size:12.5px;color:#d1d5db;line-height:1.35;margin:6px 0 0}.mapRandom{background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);border-color:#a5b4fc}.lavaZone{position:absolute;background:radial-gradient(circle,#fb923c,#b91c1c 65%,#450a0a);border:2px solid #f97316;box-shadow:0 0 18px #ef4444 inset,0 0 10px #fb923c;opacity:.82;z-index:1;pointer-events:none}.map-bounce .obstacle{background:linear-gradient(135deg,#075985,#38bdf8);border-color:#bae6fd;box-shadow:0 0 14px #38bdf8}.map-ice #board{background:radial-gradient(circle,#e0f2fe,#7dd3fc 55%,#0f172a);border-color:#bae6fd}.map-space #world{background:radial-gradient(circle at 30% 25%,#312e81,#020617 55%,#000)}.map-lava #board{background:radial-gradient(circle,#7c2d12,#3b0a0a 70%);border-color:#f97316}.map-wind #board{background:radial-gradient(circle,#bae6fd,#1e3a8a 75%);border-color:#60a5fa}.map-magnet #board{background:radial-gradient(circle,#991b1b 0 7%,#6b21a8 8% 18%,#3b2412 40%,#111827);border-color:#a78bfa}.map-factory #board{background:repeating-linear-gradient(45deg,#374151 0 18px,#1f2937 18px 36px);border-color:#9ca3af}.map-space #board{background:radial-gradient(circle,#1e1b4b,#020617 75%);border-color:#818cf8}
+.obstacle{box-shadow:inset 0 2px 6px rgba(255,255,255,.25),inset 0 -5px 10px rgba(0,0,0,.35),0 4px 12px rgba(0,0,0,.45)}
+.cap{background:radial-gradient(circle at 35% 28%,#fff,#e5e7eb 45%,#9ca3af 78%,#fff)!important;border:3px solid #111!important;box-shadow:inset -3px -4px 8px rgba(0,0,0,.25),inset 2px 2px 5px rgba(255,255,255,.9),0 3px 10px #000!important}
+
+/* better mine explosion and map obstacle themes */
+.mineBoom{position:absolute;width:36px;height:36px;border-radius:50%;pointer-events:none;z-index:35;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff7ad 0 12%,#fb923c 22%,#ef4444 45%,rgba(127,29,29,.35) 70%,transparent 72%);box-shadow:0 0 18px #facc15,0 0 38px #f97316,0 0 70px #ef4444;animation:mineBoom .48s ease-out forwards}.mineBoom:after{content:"";position:absolute;inset:-18px;border-radius:50%;border:5px solid rgba(250,204,21,.9);box-shadow:0 0 20px #fb923c;animation:mineBlastRing .52s ease-out forwards}@keyframes mineBoom{0%{opacity:1;transform:translate(-50%,-50%) scale(.35)}55%{opacity:1;transform:translate(-50%,-50%) scale(2.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(3.3)}}@keyframes mineBlastRing{0%{opacity:1;transform:scale(.25)}100%{opacity:0;transform:scale(2.2)}}.mineSpark{position:absolute;width:8px;height:8px;border-radius:50%;background:#fde047;box-shadow:0 0 10px #f97316;pointer-events:none;z-index:36;animation:mineSpark .5s ease-out forwards}@keyframes mineSpark{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.25)}}
+.map-classic .obstacle{background:linear-gradient(135deg,#4b5563,#1f2937);border-color:#d1d5db}.map-lava .obstacle{background:linear-gradient(135deg,#7f1d1d,#f97316);border-color:#fed7aa;box-shadow:0 0 12px #f97316,inset 0 2px 8px rgba(255,255,255,.25),inset 0 -5px 12px rgba(0,0,0,.45)}.map-wind .obstacle{background:linear-gradient(135deg,#0e7490,#67e8f9);border-color:#cffafe;box-shadow:0 0 14px #22d3ee,inset 0 2px 7px rgba(255,255,255,.3)}.map-ice .obstacle{background:linear-gradient(135deg,#eff6ff,#38bdf8);border-color:#e0f2fe;box-shadow:0 0 16px #7dd3fc,inset 0 0 12px rgba(255,255,255,.75)}.map-magnet .obstacle{background:linear-gradient(135deg,#991b1b 0 45%,#e5e7eb 46% 55%,#1d4ed8 56%);border-color:#fca5a5;box-shadow:0 0 16px #a78bfa,inset 0 2px 7px rgba(255,255,255,.3)}.map-factory .obstacle{background:repeating-linear-gradient(45deg,#111827 0 10px,#6b7280 10px 20px,#facc15 20px 25px);border-color:#fde68a;box-shadow:0 0 12px #f59e0b,inset 0 2px 7px rgba(255,255,255,.3)}.map-space .obstacle{background:radial-gradient(circle at 30% 30%,#c4b5fd,#4c1d95 45%,#111827 80%);border-color:#a78bfa;box-shadow:0 0 18px #8b5cf6,inset 0 2px 7px rgba(255,255,255,.25)}
+
+
+
+/* v4.1 selectable skill + nicer icons/ultimate polish */
+.card.skillSelected{
+  transform:translateY(-9px) scale(1.035)!important;
+  filter:brightness(1.28)!important;
+  box-shadow:0 0 18px #facc15,0 0 30px rgba(250,204,21,.45),inset 0 0 12px rgba(255,255,255,.18)!important;
+}
+.skillIcon,.drawIcon,.skillItem .icon{
+  border-radius:14px!important;
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.3),rgba(15,23,42,.95) 58%,#020617)!important;
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:inset 0 0 12px rgba(255,255,255,.15),0 0 10px rgba(0,0,0,.45);
+  font-family:"Trebuchet MS",Arial,"Microsoft JhengHei",sans-serif;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.card.skill-normal .skillIcon,.drawCard.skill-normal .drawIcon,.skillItem.skill-normal .icon{color:#e5e7eb;text-shadow:0 0 8px #111827}
+.card.skill-enhance .skillIcon,.drawCard.skill-enhance .drawIcon,.skillItem.skill-enhance .icon{color:#f5d0fe;text-shadow:0 0 8px #c084fc,0 0 16px #7e22ce}
+.card.skill-calm .skillIcon,.drawCard.skill-calm .drawIcon,.skillItem.skill-calm .icon{color:#dbeafe;text-shadow:0 0 8px #7dd3fc,0 0 16px #38bdf8}
+.card.skill-ultimate,.skillItem.skill-ultimate,.drawCard.skill-ultimate{
+  background:radial-gradient(circle at 50% 0%,#bbf7d0 0%,#16a34a 28%,#064e3b 74%,#021c10 100%)!important;
+  border:3px solid #bbf7d0!important;
+  box-shadow:0 0 14px #86efac,0 0 32px #22c55e,0 0 55px rgba(21,128,61,.85),inset 0 0 18px rgba(220,252,231,.35)!important;
+  animation:ultimateAura 1.25s ease-in-out infinite!important;
+}
+.card.skill-ultimate::after,.skillItem.skill-ultimate::after,.drawCard.skill-ultimate::after{
+  content:"";position:absolute;inset:-35%;pointer-events:none;opacity:.42;
+  background:conic-gradient(from 90deg,transparent 0 10%,rgba(187,247,208,.95) 15%,transparent 22% 45%,rgba(34,197,94,.95) 52%,transparent 60% 100%);
+  animation:ultimateSpin 2.1s linear infinite;
+}
+.card.skill-ultimate>* , .skillItem.skill-ultimate>* , .drawCard.skill-ultimate>*{position:relative;z-index:1}
+.card.skill-ultimate .skillIcon,.drawCard.skill-ultimate .drawIcon,.skillItem.skill-ultimate .icon{
+  color:#ecfccb;text-shadow:0 0 10px #bbf7d0,0 0 22px #22c55e,0 0 34px #16a34a;
+  background:radial-gradient(circle,#14532d,#052e16 70%,#000)!important;
+  border-color:#bbf7d0;
+}
+@keyframes ultimateAura{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22) saturate(1.35)}}
+@keyframes ultimateSpin{to{transform:rotate(360deg)}}
+
+
+
+/* v4.1 first stage: ultimate skill animation */
+#ultimateOverlay{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:9997;display:none;align-items:center;justify-content:center;pointer-events:none;overflow:hidden}
+#ultimateOverlay.show{display:flex;animation:ultimateDark .95s ease-out forwards}
+.ultimateBanner{font-size:min(11vw,74px);font-weight:1000;color:#bbf7d0;text-align:center;letter-spacing:4px;text-shadow:0 0 12px #dcfce7,0 0 28px #22c55e,0 0 55px #15803d;animation:ultimateTitle .95s ease-out forwards;white-space:pre-line}
+.ultimateBeam{position:absolute;width:82px;height:520px;border-radius:50%;background:linear-gradient(to top,rgba(34,197,94,0),rgba(187,247,208,.88),rgba(34,197,94,0));filter:blur(4px);mix-blend-mode:screen;pointer-events:none;z-index:45;animation:ultimateBeam .9s ease-out forwards}
+.ultimateParticle{position:absolute;width:9px;height:9px;border-radius:50%;background:#86efac;box-shadow:0 0 12px #22c55e,0 0 22px #bbf7d0;pointer-events:none;z-index:46;animation:ultimateParticle .75s ease-out forwards}
+.holyCircle{position:absolute;width:82px;height:82px;border-radius:50%;border:4px solid #fde68a;box-shadow:0 0 18px #facc15, inset 0 0 18px rgba(250,204,21,.6);pointer-events:none;z-index:44;animation:holyCircle .75s ease-out forwards}
+.holyRay{position:absolute;width:16px;height:150px;border-radius:50%;background:linear-gradient(to bottom,rgba(255,255,255,.95),rgba(250,204,21,.58),transparent);filter:blur(2px);pointer-events:none;z-index:43;animation:holyRay .75s ease-out forwards}
+.magicCircle{position:absolute;width:102px;height:102px;border-radius:50%;border:4px solid #c084fc;box-shadow:0 0 20px #a855f7, inset 0 0 20px rgba(168,85,247,.65);pointer-events:none;z-index:44;animation:magicCircle .82s ease-out forwards}
+.magicCircle:before{content:"✦ ✧ ✦";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f5d0fe;font-size:18px;text-shadow:0 0 12px #a855f7;animation:magicSpin 1.1s linear infinite}
+.magicPoof{position:absolute;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#f5d0fe,#a855f7 50%,transparent 72%);box-shadow:0 0 18px #a855f7;pointer-events:none;z-index:45;animation:magicPoof .58s ease-out forwards}
+.screenShake{animation:screenShake .38s linear}
+@keyframes ultimateDark{0%{opacity:0}20%{opacity:1}72%{opacity:1}100%{opacity:0}}
+@keyframes ultimateTitle{0%{opacity:0;transform:scale(.45) rotate(-2deg)}22%{opacity:1;transform:scale(1.18)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.08)}}
+@keyframes ultimateBeam{0%{opacity:0;transform:translate(-50%,-42%) scaleY(.15)}30%{opacity:1;transform:translate(-50%,-50%) scaleY(1)}100%{opacity:0;transform:translate(-50%,-60%) scaleY(1.22)}}
+@keyframes ultimateParticle{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.18)}}
+@keyframes holyCircle{0%{opacity:1;transform:scale(.25) rotate(0)}65%{opacity:1;transform:scale(1.35) rotate(160deg)}100%{opacity:0;transform:scale(1.85) rotate(260deg)}}
+@keyframes holyRay{0%{opacity:0;transform:translateY(-90px) scaleY(.35)}35%{opacity:1}100%{opacity:0;transform:translateY(24px) scaleY(1.15)}}
+@keyframes magicCircle{0%{opacity:0;transform:scale(.3) rotate(0)}40%{opacity:1;transform:scale(1.12) rotate(80deg)}100%{opacity:0;transform:scale(1.55) rotate(190deg)}}
+@keyframes magicPoof{0%{opacity:1;transform:scale(.25)}100%{opacity:0;transform:scale(2.6)}}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}20%{transform:translate(5px,-3px)}40%{transform:translate(-5px,3px)}60%{transform:translate(4px,2px)}80%{transform:translate(-3px,-2px)}}
+
+
+
+/* Stable restore extras: crystal tier, power guide, domain, AI controls */
+.card.skill-crystal,.skillItem.skill-crystal,.drawCard.skill-crystal{background:linear-gradient(135deg,rgba(8,145,178,.95),rgba(103,232,249,.55),rgba(15,23,42,.95));border-color:#a5f3fc!important;box-shadow:0 0 10px #67e8f9,0 0 20px rgba(34,211,238,.55),inset 0 0 18px rgba(236,254,255,.25)!important}
+.card.skill-crystal::after,.skillItem.skill-crystal::after,.drawCard.skill-crystal::after{content:"";position:absolute;inset:-25%;background:linear-gradient(115deg,transparent 0 38%,rgba(255,255,255,.58) 45%,transparent 54% 100%);opacity:.35;animation:crystalGlint 2.5s linear infinite;pointer-events:none}.card.skill-crystal>* ,.skillItem.skill-crystal>* ,.drawCard.skill-crystal>*{position:relative;z-index:1}@keyframes crystalGlint{from{transform:translateX(-60%) rotate(8deg)}to{transform:translateX(60%) rotate(8deg)}}
+#powerLabel{position:absolute;display:none;z-index:12;font-size:13px;font-weight:900;color:white;text-shadow:0 0 6px #000;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:2px 6px;pointer-events:none}#lastArrow{position:absolute;height:4px;background:rgba(209,213,219,.42);box-shadow:0 0 8px rgba(209,213,219,.45);transform-origin:left center;display:none;z-index:4;border-radius:4px;pointer-events:none}#lastArrow:after{content:"";position:absolute;right:-9px;top:-5px;border-left:11px solid rgba(209,213,219,.5);border-top:7px solid transparent;border-bottom:7px solid transparent}.domainRing{position:absolute;border:4px solid rgba(125,211,252,.75);border-radius:50%;box-shadow:0 0 16px #38bdf8,inset 0 0 18px rgba(125,211,252,.22);pointer-events:none;z-index:2;animation:domainPulse 1.2s ease-in-out infinite}.domainRing:after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px dashed rgba(191,239,255,.65);animation:magicSpin 3.2s linear infinite}@keyframes domainPulse{0%,100%{filter:brightness(.85);opacity:.55}50%{filter:brightness(1.45);opacity:.9}}
+.aiControls{position:fixed;right:10px;bottom:58px;z-index:5000;background:rgba(15,23,42,.88);border:1px solid #475569;border-radius:12px;padding:7px;display:flex;gap:5px;align-items:center;font-size:12px}.aiControls select,.aiControls button{font-size:12px;padding:4px 6px}
+
+
+
+/* Fix: compact skill cards so descriptions do not overflow */
+#panel{height:126px;align-items:stretch}
+#skillCards{align-items:stretch}
+.card{height:112px;min-width:158px;max-width:168px;overflow:hidden;display:flex;flex-direction:column;gap:2px}
+.card b{font-size:12px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .skillIcon{font-size:21px;margin:2px 0;padding:3px;min-height:30px;display:flex;align-items:center;justify-content:center}
+.card .skillMeta{font-size:9px;line-height:1.15;color:#facc15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .skillDesc{font-size:10px;line-height:1.22;color:#e5e7eb;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:24px}
+.card .skillTip{font-size:9px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+
+/* V6.2: pre-game AI setup + bigger synthesis box */
+.aiControls{display:none!important}
+.aiSetupBox{margin:14px auto 4px;padding:12px;border:2px solid #475569;border-radius:16px;background:rgba(15,23,42,.72);max-width:560px;text-align:left;box-shadow:inset 0 0 14px rgba(56,189,248,.12)}
+.aiSetupTitle{font-weight:900;color:#bfdbfe;margin-bottom:8px;text-align:center}
+.aiSetupRow{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:14px}
+.aiSetupRow select{background:#0f172a;color:white;border:1px solid #64748b;border-radius:10px;padding:8px 10px;font-size:14px}
+.aiSetupHint{font-size:12px;color:#cbd5e1;text-align:center;margin-top:8px;line-height:1.35}
+#panel{height:154px!important;gap:10px!important;padding:8px!important}
+#skillCards{gap:8px!important}
+.synthBox{width:230px!important;min-width:230px!important;border-width:3px!important;border-radius:16px!important;font-size:13px!important;padding:10px!important;background:rgba(250,204,21,.10)!important}
+.synthBox b{font-size:17px;color:#fde68a}
+.synthList{font-size:13px!important;margin:8px 0!important;min-height:40px;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.synthBtn{font-size:12px!important;padding:7px 9px!important;border-radius:9px!important}
+.card{min-width:150px}
+.skillDesc{max-height:31px;overflow:hidden}
+
+
+
+/* V6.03: ultimate synthesis animation + map-specific obstacle models */
+#synthOverlay{position:fixed;inset:0;background:radial-gradient(circle at center,rgba(20,83,45,.78),rgba(0,0,0,.92));z-index:9998;display:none;align-items:center;justify-content:center;pointer-events:none;overflow:hidden}
+#synthOverlay.show{display:flex;animation:synthDark 1.45s ease-out forwards}
+.synthBanner{font-size:min(10vw,68px);font-weight:1000;color:#fef9c3;text-align:center;letter-spacing:3px;text-shadow:0 0 10px #facc15,0 0 28px #22c55e,0 0 58px #16a34a;animation:synthTitle 1.45s ease-out forwards;white-space:pre-line}
+.synthFusionCard{position:absolute;width:92px;height:122px;border-radius:14px;border:3px solid #bbf7d0;background:linear-gradient(160deg,#052e16,#15803d,#fef9c3);box-shadow:0 0 22px #86efac,0 0 48px #facc15;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;animation:synthCardFly 1.25s ease-out forwards;transform-origin:center}
+.synthFusionRing{position:absolute;width:120px;height:120px;border:6px solid #fef9c3;border-radius:50%;box-shadow:0 0 28px #facc15,inset 0 0 24px #22c55e;animation:synthRing 1.1s ease-out forwards}
+.synthRune{position:absolute;width:9px;height:9px;border-radius:50%;background:#fef08a;box-shadow:0 0 12px #facc15,0 0 24px #22c55e;animation:synthRune 1.05s ease-out forwards}
+@keyframes synthDark{0%{opacity:0}15%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes synthTitle{0%{opacity:0;transform:scale(.55)}22%{opacity:1;transform:scale(1.16)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.08)}}
+@keyframes synthCardFly{0%{opacity:0;transform:translate(var(--sx),var(--sy)) rotate(var(--rot)) scale(.55)}45%{opacity:1}78%{opacity:1;transform:translate(0,0) rotate(0) scale(1.08)}100%{opacity:0;transform:translate(0,-20px) rotate(0) scale(.2)}}
+@keyframes synthRing{0%{opacity:0;transform:scale(.2) rotate(0)}40%{opacity:1;transform:scale(1.3) rotate(160deg)}100%{opacity:0;transform:scale(2.5) rotate(360deg)}}
+@keyframes synthRune{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+
+/* obstacle base polish */
+.obstacle{overflow:hidden;position:absolute}
+.obstacle:before,.obstacle:after{content:"";position:absolute;pointer-events:none}
+.map-classic .obstacle{background:linear-gradient(145deg,#7c4a23 0%,#4b2a13 55%,#1f1309 100%)!important;border-color:#d6a15f!important;border-radius:14px!important;box-shadow:inset 5px 5px 9px rgba(255,255,255,.18),inset -7px -8px 12px rgba(0,0,0,.42),0 6px 14px rgba(0,0,0,.55)!important}
+.map-classic .obstacle:before{inset:8px;border-radius:10px;border:2px solid rgba(255,226,170,.32);background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 6px,transparent 6px 15px)}
+.map-bounce .obstacle{background:linear-gradient(145deg,#38bdf8 0%,#0284c7 45%,#facc15 46%,#f97316 58%,#2563eb 59%,#0f172a 100%)!important;border-color:#e0f2fe!important;border-radius:22px!important;box-shadow:0 0 18px #38bdf8,inset 0 8px 12px rgba(255,255,255,.42),inset 0 -12px 18px rgba(0,0,0,.28)!important;animation:bounceObstaclePulse 1.15s ease-in-out infinite}
+.map-bounce .obstacle:before{left:8%;right:8%;top:10%;height:42%;border-radius:20px 20px 8px 8px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 9px,transparent 9px 18px)}
+.map-bounce .obstacle:after{left:8%;right:8%;bottom:10%;height:18%;border-radius:12px;background:rgba(255,255,255,.35);box-shadow:0 0 12px rgba(255,255,255,.55)}
+@keyframes bounceObstaclePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+.map-lava .obstacle{background:radial-gradient(circle at 30% 25%,#fed7aa 0 7%,#f97316 8% 22%,#7f1d1d 52%,#1c0606 100%)!important;border-color:#fdba74!important;border-radius:18px!important;box-shadow:0 0 18px #f97316,inset 0 0 18px #991b1b,0 6px 16px #000!important}
+.map-lava .obstacle:before{inset:10px;border-radius:12px;background:linear-gradient(120deg,transparent 0 22%,rgba(254,215,170,.75) 23% 28%,transparent 29% 58%,rgba(239,68,68,.8) 59% 65%,transparent 66%)}
+.map-wind .obstacle{background:linear-gradient(145deg,#e0f2fe,#38bdf8 42%,#075985)!important;border-color:#cffafe!important;border-radius:18px!important;box-shadow:0 0 18px #22d3ee,inset 0 5px 14px rgba(255,255,255,.45)!important}
+.map-wind .obstacle:before{inset:10px;border-radius:50%;border:4px solid rgba(255,255,255,.55);box-shadow:inset 0 0 12px #67e8f9;animation:windObstacleSpin 2.8s linear infinite}
+.map-wind .obstacle:after{left:-20%;right:-20%;top:43%;height:14%;background:rgba(255,255,255,.65);border-radius:999px;transform:rotate(-18deg)}
+@keyframes windObstacleSpin{to{transform:rotate(360deg)}}
+.map-ice .obstacle{background:linear-gradient(135deg,#fff 0%,#bae6fd 30%,#38bdf8 62%,#1e3a8a 100%)!important;border-color:#e0f2fe!important;border-radius:8px 22px 10px 24px!important;box-shadow:0 0 20px #7dd3fc,inset 0 0 18px rgba(255,255,255,.82)!important}
+.map-ice .obstacle:before{inset:7px;background:linear-gradient(130deg,rgba(255,255,255,.75),transparent 32%,rgba(255,255,255,.48) 55%,transparent 70%);clip-path:polygon(20% 0,100% 18%,80% 100%,0 72%)}
+.map-magnet .obstacle{background:linear-gradient(90deg,#b91c1c 0 34%,#f8fafc 35% 50%,#1d4ed8 51% 100%)!important;border-color:#fecaca!important;border-radius:18px!important;box-shadow:0 0 18px #a78bfa,inset 0 4px 12px rgba(255,255,255,.38)!important}
+.map-magnet .obstacle:before{left:12%;right:12%;top:18%;bottom:18%;border:5px solid rgba(255,255,255,.85);border-top:0;border-radius:0 0 50% 50%}
+.map-factory .obstacle{background:repeating-linear-gradient(45deg,#111827 0 10px,#6b7280 10px 20px,#facc15 20px 26px)!important;border-color:#fde68a!important;border-radius:8px!important;box-shadow:0 0 14px #f59e0b,inset 0 4px 10px rgba(255,255,255,.25)!important}
+.map-factory .obstacle:before{inset:8px;border:2px solid rgba(255,255,255,.28);background:repeating-linear-gradient(90deg,rgba(0,0,0,.25) 0 5px,transparent 5px 14px)}
+.map-space .obstacle{background:radial-gradient(circle at 30% 30%,#ddd6fe 0 5%,#7c3aed 15%,#312e81 48%,#020617 100%)!important;border-color:#c4b5fd!important;border-radius:42% 58% 46% 54%!important;box-shadow:0 0 22px #8b5cf6,inset 0 0 20px rgba(255,255,255,.18)!important}
+.map-space .obstacle:before{inset:9px;border-radius:50%;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.75) 0 4%,transparent 5%),radial-gradient(circle at 70% 65%,rgba(255,255,255,.5) 0 3%,transparent 4%)}
+
+
+
+/* V6.04: Skill art backgrounds are now full-card SVG illustrations (not generated images) */
+.skillIcon,.drawIcon,.skillItem .icon{overflow:hidden!important;position:relative!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#0b1020!important;border:1px solid rgba(255,255,255,.22)!important}
+.skillArtSvg{width:100%;height:100%;display:block;border-radius:12px;filter:drop-shadow(0 0 5px rgba(255,255,255,.16))}
+.card .skillIcon{height:54px!important;min-height:54px!important;margin:3px 0!important}
+.drawIcon{height:78px!important;min-height:78px!important}
+.skillItem .icon{height:82px!important;min-height:82px!important;font-size:0!important}
+.skillArtPulse{animation:skillArtPulse 2.4s ease-in-out infinite}.skillArtSpin{transform-origin:50px 30px;animation:skillArtSpin 5s linear infinite}.skillArtFlow{animation:skillArtFlow 2.2s linear infinite}.skillArtShake{animation:skillArtShake .45s ease-in-out infinite}
+@keyframes skillArtPulse{0%,100%{opacity:.72;filter:brightness(.9)}50%{opacity:1;filter:brightness(1.35)}}
+@keyframes skillArtSpin{to{transform:rotate(360deg)}}
+@keyframes skillArtFlow{from{transform:translateX(-18px)}to{transform:translateX(18px)}}
+@keyframes skillArtShake{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}50%{transform:translate(-1px,1px)}75%{transform:translate(1px,1px)}}
+
+
+
+/* V6.11 bug fixes: skill names readable + cleaner cards */
+#panel{height:172px!important;}
+.card{height:150px!important;min-width:174px!important;max-width:184px!important;}
+.card b{font-size:13px!important;line-height:1.2!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;min-height:32px;display:flex;align-items:center;justify-content:center;text-align:center;}
+.card .skillIcon{min-height:48px!important;height:48px!important;font-size:22px!important;}
+.card .skillMeta{white-space:normal!important;line-height:1.15!important;min-height:22px;}
+.card .skillDesc{-webkit-line-clamp:2!important;min-height:26px!important;}
+.synthFusionCard svg{width:78px;height:50px;display:block;}
+
+
+/* V6.2 核心規則修正 */
+.cap.cloneCap{background:radial-gradient(circle at 35% 28%,#dbeafe 0%,#60a5fa 42%,#2563eb 75%,#1e3a8a 100%)!important;border-color:#93c5fd!important;box-shadow:0 0 14px #38bdf8,inset 0 0 8px rgba(255,255,255,.85),0 4px 10px rgba(0,0,0,.55)!important}
+.cap.standCap{opacity:.72;border-style:dashed!important;box-shadow:0 0 10px #bae6fd,inset 0 0 8px rgba(255,255,255,.65)!important}
+.status{font-size:20px!important;font-weight:900;background:rgba(0,0,0,.42);border-radius:10px;padding:1px 5px;line-height:1.1;filter:drop-shadow(0 0 4px #000)}
+.skillMeta{font-size:11px;color:#fde68a;line-height:1.2}.skillDesc{font-size:11px;line-height:1.25;max-height:30px;overflow:hidden}.card b{white-space:normal;line-height:1.15;display:block;min-height:28px}.skillTip{font-size:10px;color:#cbd5e1}
+
+
+/* V6.3：更新紀錄、橫向地圖、瓶蓋描邊、新箭頭 */
+#updatePage{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:none;align-items:center;justify-content:center;color:white}
+.updateBox{width:min(92vw,760px);max-height:88vh;background:rgba(17,24,39,.96);border:2px solid #475569;border-radius:22px;padding:24px;box-shadow:0 0 35px #000;overflow:auto}
+#board{width:min(92vw,calc((100vh - 270px)*1.55))!important;height:min(calc(100vh - 285px),calc(92vw / 1.55))!important;max-width:1100px;max-height:620px}
+.cap{color:#fff!important;-webkit-text-stroke:1px #020617;text-shadow:0 1px 0 #020617,1px 0 0 #020617,0 -1px 0 #020617,-1px 0 0 #020617,0 0 5px #000!important;font-size:12px!important;font-weight:1000!important}
+#arrow{height:16px!important;border-radius:999px!important;background:linear-gradient(90deg,#38bdf8,#facc15,#f97316)!important;box-shadow:0 0 10px rgba(56,189,248,.9),0 0 18px rgba(250,204,21,.72),inset 0 2px 3px rgba(255,255,255,.45)!important;transform-origin:left center;filter:drop-shadow(0 3px 4px rgba(0,0,0,.65));}
+#arrow:after{right:-22px!important;top:-10px!important;border-left:26px solid #f97316!important;border-top:18px solid transparent!important;border-bottom:18px solid transparent!important;filter:drop-shadow(0 0 7px rgba(249,115,22,.95))}
+#arrow.maxPower{animation:arrowMaxShake .12s linear infinite;box-shadow:0 0 16px #ef4444,0 0 32px #f97316,inset 0 2px 3px rgba(255,255,255,.55)!important}
+#lastArrow{height:9px!important;border-radius:999px!important;background:rgba(203,213,225,.36)!important;box-shadow:0 0 8px rgba(203,213,225,.45)!important}
+#lastArrow:after{right:-14px!important;top:-8px!important;border-left:18px solid rgba(203,213,225,.42)!important;border-top:13px solid transparent!important;border-bottom:13px solid transparent!important}
+#powerLabel{font-size:15px!important;border-radius:999px!important;padding:4px 9px!important;background:rgba(15,23,42,.78)!important;border:1px solid rgba(255,255,255,.45)!important}
+@keyframes arrowMaxShake{0%,100%{translate:0 0}25%{translate:1px -1px}50%{translate:-1px 1px}75%{translate:1px 1px}}
+@media(max-width:700px){#board{width:94vw!important;height:60vw!important;max-height:calc(100vh - 285px)}}
+
+
+/* V6.3.1：合成動畫、箭頭、克隆視覺修正 */
+#synthOverlay.show{display:flex;animation:synthDark 4.6s ease-out forwards!important}
+.synthBanner{font-size:min(8.2vw,58px)!important;line-height:1.18!important;animation:synthTitle 4.6s ease-out forwards!important}
+.synthFusionCard{animation:synthCardFly 4s ease-out forwards!important}
+.synthFusionRing{animation:synthRing 4.1s ease-out forwards!important}
+.synthRune{animation:synthRune 3.7s ease-out forwards!important}
+.synthSummary{position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);min-width:min(88vw,540px);padding:14px 18px;border-radius:18px;background:rgba(2,6,23,.84);border:2px solid #fef08a;box-shadow:0 0 18px #facc15,0 0 42px rgba(34,197,94,.55);color:#fff;text-align:center;font-size:20px;font-weight:1000;line-height:1.5;text-shadow:0 0 8px #000;animation:synthSummaryPop 3s ease-out forwards;z-index:10001}
+.synthSummary .parts{color:#fde68a}.synthSummary .arrow{color:#86efac;font-size:24px}.synthSummary .result{color:#bbf7d0;font-size:28px;text-shadow:0 0 12px #22c55e}
+@keyframes synthSummaryPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.75)}18%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-55%) scale(.92)}}
+.cap:after{display:none!important}
+.cap{font-size:11.5px!important;line-height:1!important;-webkit-text-stroke:.65px #020617!important;text-shadow:1px 0 0 #020617,-1px 0 0 #020617,0 1px 0 #020617,0 -1px 0 #020617!important}
+.cap.cloneCap{background:radial-gradient(circle at 34% 24%,#ecfeff 0%,#67e8f9 34%,#06b6d4 58%,#1d4ed8 84%,#172554 100%)!important;border-color:#cffafe!important;color:#fff!important;box-shadow:0 0 16px #22d3ee,0 0 30px rgba(59,130,246,.65),inset 0 0 10px rgba(255,255,255,.9),0 4px 10px rgba(0,0,0,.6)!important}
+#arrow{height:22px!important;border-radius:999px!important;background:#050505!important;border:2px solid rgba(255,255,255,.45)!important;box-shadow:0 0 9px rgba(0,0,0,.9),inset 0 2px 5px rgba(255,255,255,.18)!important;overflow:visible!important}
+#arrow:before{content:"";position:absolute;left:3px;top:3px;height:12px;width:var(--power,0%);max-width:calc(100% - 6px);border-radius:999px;background:linear-gradient(90deg,#22d3ee,#a3e635,#facc15,#fb923c,#ef4444);box-shadow:0 0 10px rgba(250,204,21,.75),0 0 18px rgba(239,68,68,.45);pointer-events:none}
+#arrow:after{right:-24px!important;top:-8px!important;border-left:28px solid #111827!important;border-top:17px solid transparent!important;border-bottom:17px solid transparent!important;filter:drop-shadow(0 0 5px rgba(255,255,255,.35))!important}
+#arrow.maxPower{animation:arrowMaxShake .08s linear infinite!important;border-color:#ef4444!important;box-shadow:0 0 16px #ef4444,0 0 30px #f97316,inset 0 2px 5px rgba(255,255,255,.18)!important}
+#arrow.maxPower:after{border-left-color:#ef4444!important}
+#powerLabel.cancelPower{color:#fecaca!important;border-color:#f87171!important;background:rgba(69,10,10,.9)!important}
+#lastArrow{height:14px!important;border-radius:999px!important;background:rgba(15,23,42,.42)!important;border:1px solid rgba(203,213,225,.5)!important;box-shadow:0 0 10px rgba(203,213,225,.35)!important}
+#lastArrow:after{top:-9px!important;border-left:20px solid rgba(15,23,42,.5)!important;border-top:16px solid transparent!important;border-bottom:16px solid transparent!important}
+
+/* V6.4：瓶蓋、箭頭、跳過回合與合成動畫修正 */
+.cap{background:radial-gradient(circle at 32% 24%,#ffffff 0%,#f1f5f9 38%,#94a3b8 78%,#475569 100%)!important;border:4px solid #0f172a!important;color:#fff!important;font-size:11px!important;font-weight:1000!important;letter-spacing:.2px!important;-webkit-text-stroke:0!important;text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000,0 0 3px #000!important;box-shadow:inset 3px 3px 7px rgba(255,255,255,.95),inset -5px -6px 10px rgba(0,0,0,.34),0 4px 10px rgba(0,0,0,.62)!important;overflow:hidden}
+.cap::before{content:"";position:absolute;inset:4px;border-radius:50%;border:2px solid rgba(15,23,42,.28);box-shadow:inset 0 2px 4px rgba(255,255,255,.45);pointer-events:none}.cap:after{display:none!important}
+.cap.cloneCap{background:radial-gradient(circle at 34% 24%,#ecfeff 0%,#67e8f9 34%,#06b6d4 58%,#1d4ed8 84%,#172554 100%)!important;border-color:#cffafe!important}.cap.standCap{opacity:.78;border-style:dashed!important;filter:saturate(.8)}
+#arrow{height:30px!important;border-radius:999px!important;background:#050505!important;border:3px solid rgba(255,255,255,.52)!important;box-shadow:0 0 10px rgba(0,0,0,.95),inset 0 3px 7px rgba(255,255,255,.18)!important;overflow:visible!important}
+#arrow:before{content:"";position:absolute;left:4px;top:4px;height:16px;width:var(--power,0%);max-width:calc(100% - 8px);border-radius:999px;background:linear-gradient(90deg,#22d3ee,#a3e635,#facc15,#fb923c,#ef4444);box-shadow:0 0 10px rgba(250,204,21,.85),0 0 22px rgba(239,68,68,.5);pointer-events:none}
+#arrow:after{right:-30px!important;top:-9px!important;border-left:34px solid #111827!important;border-top:21px solid transparent!important;border-bottom:21px solid transparent!important;filter:drop-shadow(0 0 6px rgba(255,255,255,.5))!important}
+#arrow.maxPower{animation:arrowMaxShake .075s linear infinite!important;border-color:#ef4444!important;box-shadow:0 0 18px #ef4444,0 0 34px #f97316,inset 0 3px 7px rgba(255,255,255,.2)!important}
+#arrow.maxPower:after{border-left-color:#ef4444!important}
+#powerLabel{z-index:80!important;pointer-events:none!important;font-size:16px!important;line-height:1!important;padding:5px 10px!important;border-radius:999px!important;background:rgba(2,6,23,.92)!important;border:2px solid rgba(255,255,255,.5)!important;color:#fff!important;text-shadow:0 0 5px #000!important;white-space:nowrap!important;transform:translate(-50%,-50%)}
+#powerLabel.cancelPower{color:#fecaca!important;border-color:#f87171!important;background:rgba(69,10,10,.92)!important}
+#lastArrow{display:none!important}
+
+
+/* V6.4.1 歷史更新修復 */
+#board{box-shadow:0 0 0 5px rgba(96,165,250,.92),0 0 20px rgba(56,189,248,.8),inset 0 0 16px rgba(255,255,255,.22)!important}
+#board:before{content:"";position:absolute;inset:-13px;border:3px solid rgba(191,219,254,.95);border-radius:12px;pointer-events:none;box-shadow:0 0 18px #38bdf8,0 0 36px rgba(59,130,246,.55);z-index:20}
+.card>b,.skillItem>b,.drawCard>b{display:block;min-height:30px;line-height:1.18;white-space:normal;word-break:keep-all;overflow:visible;font-size:13px;text-shadow:0 1px 2px #000}
+.card{min-width:172px!important}.skillMeta{font-size:10px;line-height:1.25}.skillDesc{font-size:10px;line-height:1.28;max-height:2.6em;overflow:hidden}
+.card.skillSelected{animation:selectedCleansePulse .8s ease-in-out infinite alternate!important}
+@keyframes selectedCleansePulse{from{box-shadow:0 0 14px #86efac,0 0 24px rgba(34,197,94,.5),inset 0 0 10px rgba(255,255,255,.15);transform:translateY(-8px) scale(1.03)}to{box-shadow:0 0 26px #fef08a,0 0 42px rgba(34,197,94,.75),inset 0 0 16px rgba(255,255,255,.3);transform:translateY(-11px) scale(1.045)}}
+.cleanseFinishLabel{font-size:11px;color:#fef08a;background:rgba(20,83,45,.85);border:1px solid #bbf7d0;border-radius:999px;padding:2px 6px;display:inline-block;margin-bottom:3px;box-shadow:0 0 8px #22c55e}
+.updateHistoryPick{width:100%;padding:10px;border-radius:10px;background:#0f172a;color:white;border:1px solid #60a5fa;font-size:15px;margin:8px 0 12px}
+#historyDetail{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px;line-height:1.55;color:#e5e7eb}
+#historyDetail b{color:#facc15;font-size:17px}
+.synthBanner{line-height:1.25!important}
+.synthSummary{display:block!important;animation:synthSummaryPop 4.2s ease-out forwards!important}
+
+
+/* V6.4.3：技能圖標背景放大，不生成圖片，直接使用遊戲內 SVG */
+#panel{height:228px!important;padding:8px!important;gap:8px!important;}
+#skillCards{gap:8px!important;}
+.card{height:208px!important;min-width:188px!important;max-width:196px!important;padding:7px!important;border-radius:14px!important;}
+.card b{height:31px!important;min-height:31px!important;font-size:14px!important;line-height:1.12!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;}
+.card .skillIcon{height:126px!important;min-height:126px!important;margin:5px 0!important;border-radius:14px!important;border:2px solid rgba(255,255,255,.26)!important;box-shadow:inset 0 0 18px rgba(255,255,255,.14),0 0 14px rgba(0,0,0,.55)!important;background:#020617!important;}
+.card .skillIcon .skillArtSvg{width:100%!important;height:100%!important;border-radius:12px!important;object-fit:cover!important;}
+.card .skillMeta{font-size:11px!important;line-height:1.15!important;min-height:26px!important;max-height:28px!important;overflow:hidden!important;color:#fde68a!important;text-align:center!important;}
+.card .skillDesc{display:none!important;}
+.card .skillTip{font-size:10px!important;line-height:1.05!important;text-align:center!important;color:#cbd5e1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.drawCard{width:182px!important;min-height:184px!important;border-radius:16px!important;}
+.drawIcon{height:120px!important;min-height:120px!important;border-radius:14px!important;}
+.skillItem .icon{height:116px!important;min-height:116px!important;border-radius:16px!important;}
+.skillItem b{font-size:16px!important;line-height:1.2!important;}
+@media(max-width:700px){#panel{height:210px!important}.card{height:192px!important;min-width:164px!important;max-width:170px!important}.card .skillIcon{height:112px!important;min-height:112px!important}.card b{font-size:13px!important}.card .skillMeta{font-size:10px!important}}
+
+</style>
+</head>
+<body>
+<div id="startMenu">
+  <div class="menuBox">
+    <h1 class="menuTitle">瓶蓋大戰 V6.4.3</h1>
+    <div class="menuSub">V6.4.3｜技能圖標背景放大更新。</div>
+    <div class="menuBtns">
+      <button onclick="startGameFromMenu()">開始遊戲</button>
+      <button onclick="openSkillCatalog()">技能目錄</button>
+      <button onclick="openRulePage()">規則判定</button>
+      <button onclick="openRecipePage()">合成圖鑑</button>
+      <button onclick="openUpdatePage()">更新紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div id="mapSelect">
+  <div class="mapBox">
+    <h2 class="mapTitle">選擇地圖</h2>
+    <div class="menuSub">選完地圖後會開始抽技能動畫。</div>
+    <div id="mapGrid" class="mapGrid"></div>
+    <div class="aiSetupBox">
+      <div class="aiSetupTitle">AI 設定（遊玩前設定）</div>
+      <div class="aiSetupRow">
+        <span>P2～P4：</span>
+        <select id="aiDifficulty">
+          <option value="off">關閉 AI</option>
+          <option value="rookie">新手</option>
+          <option value="veteran">老手</option>
+          <option value="hard">困難</option>
+          <option value="nightmare">夢魘</option>
+          <option value="boss">魔王</option>
+        </select>
+      </div>
+      <div class="aiSetupHint">選完地圖後會套用。AI 不會再蓋在遊戲畫面上。</div>
+    </div>
+    <div class="menuBtns"><button onclick="closeMapSelect()">返回主選單</button></div>
+  </div>
+</div>
+
+<div id="skillCatalog">
+  <div class="catalogBox">
+    <div class="catalogTop">
+      <h2>技能目錄</h2>
+      <button onclick="closeSkillCatalog()">退出</button>
+    </div>
+    <div id="skillList" class="skillList"></div>
+  </div>
+</div>
+<div id="rulePage">
+  <div class="ruleBox">
+    <div class="catalogTop">
+      <h2>規則判定</h2>
+      <button onclick="closeRulePage()">退出</button>
+    </div>
+    <div class="ruleList">
+      <div class="ruleCard"><b>V6.4 合成</b><p>終極合成動畫延長，移除合成時的大資訊框；配方新增解藥路線可合成淨化。</p></div>
+      <div class="ruleCard"><b>V6.4 操作</b><p>箭頭力道上限提高到 200%，箭身更寬；小力提示可取消，力道數字移到箭頭上方避免遮擋。</p></div>
+      <div class="ruleCard"><b>V6.4 規則</b><p>防護罩無法擋終極以上技能；高壓電不能阻止終極技能；解藥不處理終極以上效果。</p></div>
+      <div class="ruleCard"><b>V6.4 技能次數</b><p>可使用 2 次以上或無限的技能，被防護罩擋下後只扣一次或不消失；無限技能永遠保留。</p></div>
+      <div class="ruleCard"><b>V6.4 UI</b><p>瓶蓋模型重做、文字變清楚；跳過回合改成場外按鈕，避免誤觸桌面跳過。</p></div>
+      <div class="ruleCard"><b>1. 回合與移動</b><p>每位玩家輪流行動。拖曳瓶蓋反方向蓄力，放開後發射。瓶蓋停止後自動換下一位。</p></div>
+      <div class="ruleCard"><b>2. 優先級</b><p>⚡閃電級：使用後不消耗移動。⭕圈圈級：使用後會結束回合。</p></div>
+      <div class="ruleCard"><b>3. 被動技能</b><p>防護罩、復活、時空回溯沒有使用鍵，符合條件時自動觸發。</p></div>
+      <div class="ruleCard"><b>4. 第一輪保護</b><p>第 1 輪禁止殺人，掉出桌面也會被拉回桌面。</p></div>
+      <div class="ruleCard"><b>5. 掉出桌面</b><p>第 2 輪開始，瓶蓋飛出桌面會依照力道飛進虛空並慢慢消失，最後淘汰。</p></div>
+      <div class="ruleCard"><b>6. 防護罩判定</b><p>被指定技能命中時，防護罩持有者會選擇要不要使用防護罩擋下技能。</p></div>
+      <div class="ruleCard"><b>7. 復活與時空回溯</b><p>復活會回出生點；時空回溯會回到上一輪開始位置，並讓回溯者接著行動。</p></div>
+      <div class="ruleCard"><b>8. 保護色</b><p>使用後暫時出局、無碰撞、不可選中；當場上只剩一隊時，保護色玩家選位置回場。</p></div>
+      <div class="ruleCard"><b>9. 替身與克隆</b><p>替身和本體算同一隊；本體死替身跟著死。克隆是獨立主體，但不能殺自己的原主體。</p></div>
+      <div class="ruleCard"><b>10. 決鬥</b><p>場上剩兩隊時會進入「絕地死鬥」。決鬥時瘟疫只能指定一人。</p></div>
+      <div class="ruleCard"><b>11. 雙殺</b><p>如果最後兩隊同時死亡，會顯示「雙殺！無人生還」。</p></div>
+      <div class="ruleCard"><b>12. 障礙物與傳送</b><p>瓶蓋不能進入障礙物，瞬間移動與錨點傳送也不能選在障礙物上。</p></div>
+    </div>
+  </div>
+</div>
+<div id="recipePage">
+  <div class="recipeBox">
+    <div class="catalogTop">
+      <h2>合成圖鑑</h2>
+      <button onclick="closeRecipePage()">退出</button>
+    </div>
+    <div class="ruleList">
+      <div class="ruleCard"><b>🟢 No.19 淨化</b><p>防護罩 + 復活<br>防護罩 + 失落的十字架<br>搬運工 + 復活<br>搬運工 + 失落的十字架</p></div>
+      <div class="ruleCard"><b>🟢 No.21 魔術師</b><p>瞬間移動 + 交換<br>搬運工 + 交換</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="updatePage">
+  <div class="updateBox">
+    <div class="catalogTop">
+      <h2>更新日報 V6.4.3</h2>
+      <button onclick="closeUpdatePage()">退出</button>
+    </div>
+    <div class="ruleList">
+
+      <div class="ruleCard"><b>V6.4.3 技能圖標背景</b><p>技能卡改成大插畫版，圖標背景填滿，不再只是小圖示；卡片文字縮短，完整說明改放滑鼠提示與技能目錄。</p></div>
+      <div class="ruleCard"><b>V6.4.2 規則修復</b><p>復活與時空回溯同時存在時，先消耗復活；絕對領域改為閃電級；修正領域殘留；取消合成成功的大方框。</p></div>
+      <div class="ruleCard"><b>V6.4.1 歷史更新修復</b><p>合成動畫延長並清楚顯示素材與結果；地圖邊界新增屏障；淨化可連續選多人，按「結束洗禮」後才消失；修正部分技能名稱被吃掉。</p></div>
+      <div class="ruleCard"><b>淨化流程</b><p>第一次選取目標後，淨化卡會浮起閃爍並顯示「結束洗禮」。完成前可以繼續淨化不限數量目標。</p></div>
+      <div class="ruleCard"><b>合成演出</b><p>兩張素材卡飛向中央，融合後顯示合成出的終極技能，讓玩家看清楚「用什麼技能合成出什麼技能」。</p></div>
+    </div>
+    <hr style="border-color:#334155;margin:18px 0">
+    <h3>📚 歷史版本</h3>
+    <p style="color:#cbd5e1">往下滑到這裡後，選擇想看的版本。</p>
+    <select class="updateHistoryPick" onchange="showHistoryVersion(this.value)">
+      <option value="v643">V6.4.3 技能圖標背景</option>
+      <option value="v642">V6.4.2 規則修復</option>
+      <option value="v641">V6.4.1 歷史更新修復</option>
+      <option value="v64">V6.4 更新</option>
+      <option value="v631">V6.3.1 操作修正</option>
+      <option value="v63">V6.3 操作與地圖更新</option>
+      <option value="v621">V6.21 修復版</option>
+      <option value="v62">V6.2 核心修正</option>
+      <option value="v602">V6.02 早期整合版</option>
+      <option value="v5">V5 UI 與 30 技能目標</option>
+    </select>
+    <div id="historyDetail"></div>
+  </div>
+</div>
+<div id="drawOverlay"><div class="drawBox"><div class="drawTitle">技能抽取中</div><div id="drawPlayer" class="drawPlayer"></div><div id="drawCards" class="drawCards"></div></div></div>
+<div id="ultimateOverlay"><div class="ultimateBanner">終極技能！</div></div>
+<div id="synthOverlay"><div class="synthBanner">終極合成！</div></div>
+
+<div id="game"><div id="top"><div id="turnText">瓶蓋大戰</div><div><button onclick="showHelp()">說明</button><button onclick="skipTurnButton()">跳過回合</button><button onclick="openMapSelect()">重開</button><button onclick="backToMenu()">回到選單</button></div></div><div id="world"><div id="board"></div><div id="lastArrow"></div><div id="arrow"></div><div id="powerLabel"></div><div id="turnBanner"></div><div id="duelBanner">絕地死鬥!</div><div id="winBox"><h1 id="winnerText">勝利！</h1><button onclick="openMapSelect()">重新開始</button></div><div id="shieldBox"><h2>防護罩</h2><p id="shieldText">是否使用防護罩？</p><button onclick="shieldAnswer(true)">使用</button><button onclick="shieldAnswer(false)">不使用</button></div><div id="help"><div id="helpBox"><h2>遊戲說明</h2><p>⚡ 閃電級：使用後不消耗移動次數。⭕ 圈圈級：使用後直接結束回合。衝擊波已改為閃電級。</p><p>🟢 被動：只有防護罩、復活、時空回溯，沒有使用鍵。</p><p>⏪ 時空回溯：死亡時回到上一輪開始的位置，然後換回回溯者行動。</p><p>瘟疫：平常可選兩人；決鬥時只能選一人。5回合後淘汰，施放者死亡會解除。</p><p>剩下兩隊時會顯示紅色大字「絕地死鬥!」。</p><p>冷凍致傷：2回後-50%，再3回後幾乎凍住，最後5回永凍。</p><p>⚓ 錨點：第一次使用在腳下留下船錨，第二次使用傳回錨點位置。</p><p>最後兩人同時死會顯示「雙殺！無人生還」。</p><button onclick="hideHelp()">關閉</button></div></div></div><div id="panel"></div><div id="log"></div></div>
+<script>
+const world=document.getElementById('world'),board=document.getElementById('board'),panel=document.getElementById('panel'),logBox=document.getElementById('log'),turnText=document.getElementById('turnText'),arrow=document.getElementById('arrow'),banner=document.getElementById('turnBanner'),winBox=document.getElementById('winBox'),winnerText=document.getElementById('winnerText'),shieldBox=document.getElementById('shieldBox'),shieldText=document.getElementById('shieldText'),duelBanner=document.getElementById('duelBanner');
+const SIZE=34,R=17,FRICTION=.955,MIN_SPEED=.12,BASE_POWER=.132,MAX_PULL=290,POWER_100_PULL=145;let players=[],obstacles=[],mines=[],lavaZones=[],currentMap='classic',current=0,round=1,nextId=1,minePlacement=null,dragging=false,dragPlayer=null,dragPointerId=null,dragStart={x:0,y:0},dragNow={x:0,y:0},dragDown={x:0,y:0},dragMoved=false,actionStarted=false,animating=false,gameOver=false,usingSkill=null,movedThisTurn=false,selectingReturnPlayer=null,pendingShield=null,teleportTarget=null,forceNextIndex=null,plagueTargets=[],duelStarted=false,synthSlots=[],objectMove=null,windX=0,windY=0,factoryTick=0,lastPower=0,aiTimer=null,animFrameCount=0,conductLinks=[],pendingAILevel="off";
+const skills=[
+{name:'防護罩',icon:'🛡',desc:'被指定時可選擇擋下',type:'passive',priority:'⚡閃電級',passive:true,uses:1,mode:'自己',rounds:'觸發'},
+{name:'高壓電',icon:'⚡',desc:'指定玩家下回合不能移動也不能用技能',type:'target',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'1'},
+{name:'殺手',icon:'🗡',desc:'自己的回合碰到人才可暗殺',type:'self',priority:'⭕圈圈級',uses:1,mode:'自己',rounds:'1'},
+{name:'復活',icon:'❤️',desc:'死亡時回出生點',type:'passive',priority:'⚡閃電級',passive:true,uses:1,mode:'自己',rounds:'觸發'},
+{name:'保護色',icon:'👻',desc:'隱身暫時出局',type:'self',priority:'⭕圈圈級',uses:1,mode:'自己',rounds:'無限'},
+{name:'衝擊波',icon:'💥',desc:'炸飛附近瓶蓋',type:'self',priority:'⚡閃電級',uses:1,mode:'自己',rounds:'1'},
+{name:'瞬間移動',icon:'🌀',desc:'指定玩家移到位置，可使用兩次',type:'teleport',priority:'⚡閃電級',uses:2,mode:'指定',rounds:'1'},
+{name:'交換',icon:'🔄',desc:'和指定玩家換位置',type:'target',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'1'},
+{name:'瘟疫',icon:'☠️',desc:'可選2人，5回合後淘汰；施放者死則解除',type:'target',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'5'},
+{name:'解藥',icon:'🧪',desc:'解除負面狀態',type:'self',priority:'⚡閃電級',uses:1,mode:'自己',rounds:'1'},
+{name:'時空回溯',icon:'⏪',desc:'死亡時回上一輪位置',type:'passive',priority:'⚡閃電級',passive:true,uses:1,mode:'自己',rounds:'觸發'},
+{name:'全部不准動',icon:'⛔',desc:'全體玩家跳過一回（施放者除外）',type:'self',priority:'⚡閃電級',uses:1,mode:'全體',rounds:'1'},
+{name:'替身',icon:'👥',desc:'召喚兩個替身',type:'self',priority:'⭕圈圈級',uses:1,mode:'自己',rounds:'1'},
+{name:'暴衝',icon:'💨',desc:'指定玩家，本回合隨機 700/950/1200% 力道',type:'target',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'1'},
+{name:'克隆',icon:'🧬',desc:'召喚獨立主體',type:'self',priority:'⭕圈圈級',uses:1,mode:'自己',rounds:'1'},
+{name:'冷凍致傷',icon:'❄️',desc:'2回後-50%，再3回後幾乎凍住，最後永凍',type:'target',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'10'},
+{name:'錨點',icon:'⚓',desc:'第一次放錨，第二次傳回錨點',type:'self',priority:'⭕圈圈級',uses:'∞',mode:'自己',rounds:'無限'},
+{name:'淨化',icon:'🌿',desc:'一次使用，可連續選多名目標復活或解除負面狀態',type:'cleanse',priority:'⭕圈圈級',uses:1,mode:'全體',rounds:'1'},
+{name:'搬運工',icon:'📦',desc:'可以搬走兩個障礙物，使用兩次',type:'object',priority:'⭕圈圈級',uses:2,mode:'指定',rounds:'2'},
+{name:'魔術師',icon:'🎩',desc:'移動玩家或障礙物，可連續移動多個物件',type:'object',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'1'},
+{name:'失落的十字架',icon:'✝️',desc:'復活一名淘汰者，復活後會成為你的隊友',type:'cross',priority:'⭕圈圈級',uses:1,mode:'指定',rounds:'1'},
+{name:'時間水晶',icon:'💎',desc:'複製一張手牌，或重抽一張非重複技能',type:'crystalTime',priority:'⚡閃電級',uses:1,mode:'水晶',rounds:'1'},
+{name:'複製水晶',icon:'◆',desc:'可與指定技能合成更強技能',type:'crystalCopy',priority:'⚡閃電級',uses:1,mode:'水晶',rounds:'1'},
+{name:'屠夫',icon:'🪓',desc:'無限殺手，自己的回合碰到人可暗殺',type:'self',priority:'⭕圈圈級',uses:'∞',mode:'自己',rounds:'無限'},
+{name:'時空支配',icon:'⌛',desc:'指定其他玩家回到上一輪位置',type:'target',priority:'⭕圈圈級',uses:'∞',mode:'指定',rounds:'無限'},
+{name:'絕對領域',icon:'◯',desc:'展開領域推開其他玩家，再按一次解除',type:'domain',priority:'⚡閃電級',uses:'∞',mode:'自己',rounds:'無限'},
+{name:'導電',icon:'ϟ',desc:'指定兩人，兩人互碰即一起淘汰',type:'target',priority:'⚡閃電級',uses:1,mode:'指定',rounds:'2'},
+{name:'D4C',icon:'◇',desc:'任意合法位置召喚克隆，可用3次',type:'d4c',priority:'⭕圈圈級',uses:3,mode:'指定',rounds:'3'}
+];
+
+function startGameFromMenu(){
+  document.getElementById('startMenu').style.display='none';
+  document.getElementById('skillCatalog').style.display='none';
+  const ms=document.getElementById('mapSelect'); if(ms)ms.style.display='none';
+  const rp=document.getElementById('rulePage'); if(rp)rp.style.display='none';
+  openMapSelect();
+}
+
+const MAPS=[
+  {id:'classic',icon:'🟤',name:'經典',desc:'最原本的桌面與十字障礙，最平衡。'},
+  {id:'bounce',icon:'🔵',name:'彈射',desc:'和經典一樣，但障礙物很彈，撞到會高速回彈。'},
+  {id:'lava',icon:'🔥',name:'熔岩',desc:'四個角落是熔岩區，第二輪後碰到直接淘汰。'},
+  {id:'wind',icon:'🌪️',name:'旋風',desc:'每一輪會隨機吹風，瓶蓋會被慢慢推動。'},
+  {id:'ice',icon:'❄️',name:'冰原',desc:'地面超滑，瓶蓋滑行距離變遠。'},
+  {id:'magnet',icon:'🧲',name:'磁力',desc:'中央磁場會把瓶蓋慢慢吸向中心。'},
+  {id:'factory',icon:'⚙️',name:'工廠',desc:'部分障礙物會來回移動，路線更難預測。'},
+  {id:'space',icon:'🌌',name:'宇宙',desc:'低重力，瓶蓋飛得更遠，背景變成星空。'}
+];
+function openMapSelect(){
+  buildMapSelect();
+  document.getElementById('startMenu').style.display='none';
+  document.getElementById('skillCatalog').style.display='none';
+  const rp=document.getElementById('rulePage'); if(rp)rp.style.display='none';
+  const cp=document.getElementById('recipePage'); if(cp)cp.style.display='none'; const up=document.getElementById('updatePage'); if(up)up.style.display='none';
+  document.getElementById('mapSelect').style.display='flex';
+}
+function closeMapSelect(){
+  document.getElementById('mapSelect').style.display='none';
+  document.getElementById('startMenu').style.display='flex';
+}
+function buildMapSelect(){
+  const grid=document.getElementById('mapGrid'); if(!grid)return; grid.innerHTML='';
+  [...MAPS,{id:'random',icon:'🎲',name:'隨機',desc:'從所有地圖中隨機選一張。'}].forEach(m=>{
+    const c=document.createElement('div');
+    c.className='mapCard '+(m.id==='random'?'mapRandom':'');
+    c.innerHTML=`<div class="mapIcon">${m.icon}</div><b>${m.name}</b><p>${m.desc}</p>`;
+    c.onclick=()=>selectMap(m.id);
+    grid.appendChild(c);
+  });
+}
+function selectMap(id){
+  if(id==='random')id=MAPS[Math.floor(Math.random()*MAPS.length)].id;
+  const aiSel=document.getElementById('aiDifficulty');
+  pendingAILevel=aiSel?aiSel.value:'off';
+  currentMap=id;
+  document.getElementById('mapSelect').style.display='none';
+  restart(true);
+  applyPendingAI();
+}
+function mapName(){const m=MAPS.find(x=>x.id===currentMap);return m?m.name:'經典'}
+function mapClass(){return 'map-'+currentMap}
+function setMapVisualClass(){document.body.className=document.body.className.replace(/\bmap-[a-z]+\b/g,'').trim();document.body.classList.add(mapClass())}
+function currentFriction(){return currentMap==='ice'?0.985:(currentMap==='space'?0.965:FRICTION)}
+function chooseWind(){
+  if(currentMap!=='wind'){windX=0;windY=0;return}
+  const dirs=[[.035,0],[-.035,0],[0,.035],[0,-.035]];
+  const d=dirs[Math.floor(Math.random()*dirs.length)]; windX=d[0]; windY=d[1];
+  const name=windX>0?'向右':windX<0?'向左':windY>0?'向下':'向上';
+  log('旋風地圖：本輪風向 '+name+'。');
+}
+function updateMapForces(){
+  factoryTick++;
+  if(currentMap==='wind')players.forEach(p=>{if(!p.dead&&!p.hiddenOut&&!p.falling){p.vx+=windX;p.vy+=windY}});
+  if(currentMap==='magnet'){
+    const b=boardBox(),cx=b.left+b.width/2,cy=b.top+b.height/2;
+    players.forEach(p=>{if(p.dead||p.hiddenOut||p.falling)return;let dx=cx-(p.x+R),dy=cy-(p.y+R),d=Math.hypot(dx,dy)||1;p.vx+=dx/d*.025;p.vy+=dy/d*.025});
+  }
+  if(currentMap==='factory'){
+    const b=boardBox();
+    obstacles.forEach(o=>{if(!o.move)return;o.x+=o.dx;o.y+=o.dy;if(o.x<b.left+25||o.x+o.w>b.right-25)o.dx*=-1;if(o.y<b.top+25||o.y+o.h>b.bottom-25)o.dy*=-1;if(o.el){o.el.style.left=o.x+'px';o.el.style.top=o.y+'px'}});
+  }
+}
+function makeLavaZone(x,y,w,h){const e=document.createElement('div');e.className='lavaZone';e.style.left=x+'px';e.style.top=y+'px';e.style.width=w+'px';e.style.height=h+'px';world.appendChild(e);lavaZones.push({x,y,w,h,el:e})}
+function checkMapHazards(){
+  if(currentMap!=='lava'||round===1)return;
+  for(const p of players){if(p.dead||p.hiddenOut||p.falling)continue;const cx=p.x+R,cy=p.y+R;if(lavaZones.some(z=>cx>z.x&&cx<z.x+z.w&&cy>z.y&&cy<z.y+z.h)){text(p,'掉進熔岩!','orange');kill(p)}}
+}
+function setupMap(bx,by,bw,bh){
+  setMapVisualClass(); lavaZones=[]; windX=0; windY=0;
+  const wall=Math.max(55,bw*.085),gap=Math.max(70,bw*.14);
+  const cx=bx+bw/2,cy=by+bh/2;
+  const small=Math.max(42,bw*.075),mid=Math.max(62,bw*.12);
+
+  if(currentMap==='classic'||currentMap==='bounce'){
+    makeObstacle(cx-wall/2,by+gap,wall,bh-gap*2);
+    makeObstacle(bx+gap,cy-wall/2,bw-gap*2,wall);
+    makeObstacle(cx-bw*.08,cy-bw*.08,bw*.16,bw*.16);
+  }else if(currentMap==='lava'){
+    makeObstacle(cx-mid/2,cy-mid/2,mid,mid);
+    makeObstacle(bx+bw*.25-small/2,cy-small/2,small,small);
+    makeObstacle(bx+bw*.75-small/2,cy-small/2,small,small);
+    makeObstacle(cx-small/2,by+bh*.25-small/2,small,small);
+    makeObstacle(cx-small/2,by+bh*.75-small/2,small,small);
+    const z=Math.max(58,bw*.16);
+    makeLavaZone(bx+8,by+8,z,z);makeLavaZone(bx+bw-z-8,by+8,z,z);makeLavaZone(bx+8,by+bh-z-8,z,z);makeLavaZone(bx+bw-z-8,by+bh-z-8,z,z);
+  }else if(currentMap==='wind'){
+    makeObstacle(cx-wall/2,by+bh*.18,wall,bh*.28);
+    makeObstacle(cx-wall/2,by+bh*.54,wall,bh*.28);
+    makeObstacle(bx+bw*.18,cy-wall/2,bw*.22,wall);
+    makeObstacle(bx+bw*.60,cy-wall/2,bw*.22,wall);
+  }else if(currentMap==='ice'){
+    makeObstacle(cx-mid/2,cy-mid/2,mid,mid);
+    makeObstacle(bx+bw*.20-small/2,by+bh*.33-small/2,small,small);
+    makeObstacle(bx+bw*.80-small/2,by+bh*.33-small/2,small,small);
+    makeObstacle(bx+bw*.20-small/2,by+bh*.67-small/2,small,small);
+    makeObstacle(bx+bw*.80-small/2,by+bh*.67-small/2,small,small);
+  }else if(currentMap==='magnet'){
+    makeObstacle(cx-bw*.10,cy-bw*.10,bw*.20,bw*.20);
+    makeObstacle(cx-wall/2,by+bh*.16,wall,bh*.18);
+    makeObstacle(cx-wall/2,by+bh*.66,wall,bh*.18);
+    makeObstacle(bx+bw*.16,cy-wall/2,bw*.18,wall);
+    makeObstacle(bx+bw*.66,cy-wall/2,bw*.18,wall);
+  }else if(currentMap==='factory'){
+    makeObstacle(cx-wall/2,by+gap,wall,bh*.24);
+    makeObstacle(cx-wall/2,by+bh*.58,wall,bh*.24);
+    makeObstacle(bx+gap,cy-wall/2,bw*.28,wall);
+    makeObstacle(bx+bw*.58,cy-wall/2,bw*.28,wall);
+    obstacles.forEach((o,i)=>{o.move=true;o.dx=(i%2===0?1.25:-1.25);o.dy=(i%2===1?1.25:-1.25)});
+  }else if(currentMap==='space'){
+    makeObstacle(cx-mid/2,cy-mid/2,mid,mid);
+    makeObstacle(bx+bw*.32-small/2,by+bh*.22-small/2,small,small);
+    makeObstacle(bx+bw*.68-small/2,by+bh*.22-small/2,small,small);
+    makeObstacle(bx+bw*.32-small/2,by+bh*.78-small/2,small,small);
+    makeObstacle(bx+bw*.68-small/2,by+bh*.78-small/2,small,small);
+  }else{
+    makeObstacle(cx-wall/2,by+gap,wall,bh-gap*2);
+    makeObstacle(bx+gap,cy-wall/2,bw-gap*2,wall);
+    makeObstacle(cx-bw*.08,cy-bw*.08,bw*.16,bw*.16);
+  }
+  chooseWind();
+}
+
+function openSkillCatalog(){
+  buildSkillCatalog();
+  document.getElementById('skillCatalog').style.display='flex';
+}
+function closeSkillCatalog(){
+  document.getElementById('skillCatalog').style.display='none';
+}
+
+function openRulePage(){
+  document.getElementById('rulePage').style.display='flex';
+}
+function closeRulePage(){
+  document.getElementById('rulePage').style.display='none';
+}
+function openRecipePage(){
+  document.getElementById('recipePage').style.display='flex';
+}
+function closeRecipePage(){
+  document.getElementById('recipePage').style.display='none';
+}
+
+function openUpdatePage(){
+  const p=document.getElementById('updatePage'); if(p){p.style.display='flex'; setTimeout(()=>showHistoryVersion('v642'),0)}
+}
+function closeUpdatePage(){
+  const p=document.getElementById('updatePage'); if(p)p.style.display='none';
+}
+
+const VERSION_HISTORY={
+  v642:{title:'V6.4.2 規則修復',items:['復活與時空回溯同時擁有時，先消耗復活。','絕對領域改為閃電級，不會結束回合。','修正絕對領域一局結束後殘留在場上的問題。','取消合成成功的大資訊方框，保留合成動畫與結果顯示。']},
+  v641:{title:'V6.4.1 歷史更新修復',items:['終極合成動畫延長並顯示素材與結果。','地圖四周新增可見屏障，方便清點與復活。','淨化可連續作用多人，按結束洗禮後才消失。','修正部分技能名稱被吃掉。']},
+  v64:{title:'V6.4 更新',items:['力道上限提升到 200%。','箭頭更寬，力道顯示移到較不擋視線的位置。','跳過回合改成場外按鈕。','防護罩、解藥、高壓電不能作用於終極以上技能。','多次或無限技能被防護罩擋下時不會直接消失。']},
+  v631:{title:'V6.3.1 操作修正',items:['合成動畫變長。','克隆改成共享技能池。','D4C 使用不同顏色。','加入跳過回合。','箭頭改成能量條方向。']},
+  v63:{title:'V6.3 操作與地圖更新',items:['地圖改為橫向。','四邊虛空都能看見。','魔術師改為閃電級。','更新紀錄放進遊戲。','瓶蓋文字加外框。']},
+  v621:{title:'V6.21 修復版',items:['網頁版本顯示修正。','水晶重抽規則整理。','重複提示合併規劃。']},
+  v62:{title:'V6.2 核心修正',items:['D4C 全部算同隊。','克隆先於替身行動。','弱點與善良後續移除。','全部不可動修正為全體。','時間水晶只能複製自己手牌一張技能。']},
+  v602:{title:'V6.02 早期整合版',items:['AI 設定移到遊玩前。','合成欄放大。','合成與技能分類初步整理。']},
+  v5:{title:'V5 UI 與 30 技能目標',items:['技能卡大插畫版。','建立 30 技能目標。','加入水晶與終極合成方向。','開始規劃 AI 玩家。']}
+};
+function showHistoryVersion(v){
+  const box=document.getElementById('historyDetail'); if(!box)return;
+  const data=VERSION_HISTORY[v]||VERSION_HISTORY.v641;
+  box.innerHTML='<b>'+data.title+'</b><ul>'+data.items.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+}
+function buildSkillCatalog(){
+  const list=document.getElementById('skillList');
+  if(!list)return;
+  list.innerHTML='';
+  skills.forEach((sk,i)=>{
+    const item=document.createElement('div');
+    item.className='skillItem '+skillTierClass(sk.name);
+    const no=i+1;
+    const tier=skillTierLabel(sk.name); const tag=(sk.passive?'🟢被動｜':'')+tier+'｜'+(sk.priority||'');
+    item.innerHTML=`<b>No.${no} ${sk.name}</b><div class="icon">${prettyIcon(sk.name)}</div><small>${tag}</small><p>${sk.desc}</p><p class="guide">${skillGuide(sk.name)}</p>`;
+    item.addEventListener('click',()=>item.classList.toggle('open'));
+    list.appendChild(item);
+  });
+}
+function skillGuide(name){
+  const guides={
+    '防護罩':'被技能指定時跳出選擇，可消耗防護罩擋下。',
+    '高壓電':'點技能後選一名玩家，使他下回合不能用技能。',
+    '殺手':'使用後下一次碰到別人時觸發淘汰。',
+    '復活':'死亡時自動回出生點，觸發後消失。',
+    '保護色':'使用後暫時出局，場上剩一隊時選位置回場。',
+    '衝擊波':'使用後放出大型綠色波，把附近瓶蓋推開。',
+    '瞬間移動':'先選玩家，再點桌面位置傳送；不能傳到障礙物或重疊處。',
+    '交換':'選一名敵人，和自己交換位置。',
+    '瘟疫':'第1輪不能用；平常可選兩人，決鬥只能選一人；施放者死會解除。',
+    '解藥':'解除自己身上的負面狀態。',
+    '時空回溯':'死亡時自動回到上一輪開始位置，並換自己行動。',
+    '全部不可動':'讓其他玩家跳過一回，自己等於再動一回。',
+    '替身':'在左右召喚兩個替身，本體死替身一起死。',
+    '暴衝':'指定一名玩家，隨機獲得700%、950%或1200%暴衝，結果會顯示給所有玩家。',
+    '克隆':'召喚一個獨立瓶蓋主體。',
+    '冷凍致傷':'指定一人，2回後減速，再3回更慢，再5回永凍。',
+    '錨點':'第一次使用在腳下放錨點；再點錨點或技能可回去。',
+    '地雷':'放置三顆黑色顯型地雷。不能放在玩家身上、玩家旁邊、障礙物或虛空。碰到地雷者死亡，爆炸不影響其他人。',
+    '淨化':'由（防護罩或搬運工）+（復活或失落的十字架）合成。選活人可解除負面狀態；選死人可復活並變成使用者隊友。',
+    '搬運工':'選一個障礙物，再點安全位置搬過去；可以搬兩次。',
+    '魔術師':'No.21 終極技能。由瞬間移動/搬運工 + 交換合成。可移動玩家或障礙物，不能放在人身上或太靠近玩家。',
+    '失落的十字架':'No.22 強化技能。指定一名已淘汰玩家復活，復活後直接變成你的隊友。',
+  };
+  return guides[name]||'照技能說明使用。';
+}
+function boardBox(){const b=board.getBoundingClientRect(),w=world.getBoundingClientRect();return{left:b.left-w.left,top:b.top-w.top,width:b.width,height:b.height,right:b.left-w.left+b.width,bottom:b.top-w.top+b.height}}
+function safeSpot(x,y){const b=boardBox();return{x:Math.max(b.left+12,Math.min(b.right-SIZE-12,x)),y:Math.max(b.top+12,Math.min(b.bottom-SIZE-12,y))}}
+function pointInObstacle(x,y){const cx=x+R,cy=y+R;return obstacles.some(o=>cx>o.x&&cx<o.x+o.w&&cy>o.y&&cy<o.y+o.h)}
+function isFreeSpot(x,y,ignore=null){const b=boardBox(),cx=x+R,cy=y+R;if(cx<b.left+R||cx>b.right-R||cy<b.top+R||cy>b.bottom-R)return false;if(pointInObstacle(x,y))return false;return players.every(p=>p===ignore||p.dead||p.hiddenOut||Math.hypot((p.x+R)-cx,(p.y+R)-cy)>=R*2+4)}
+function findFreeSpot(x,y,ignore=null){let base=safeSpot(x,y);if(isFreeSpot(base.x,base.y,ignore))return base;for(let rad=10;rad<=360;rad+=10){for(let a=0;a<Math.PI*2;a+=Math.PI/8){const nx=base.x+Math.cos(a)*rad,ny=base.y+Math.sin(a)*rad,pos=safeSpot(nx,ny);if(isFreeSpot(pos.x,pos.y,ignore))return pos}}return base}
+function worldPoint(e){const r=world.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}}
+function cancelDrag(){dragging=false;dragPlayer=null;dragPointerId=null;arrow.style.display='none';arrow.classList.remove('maxPower');const pl=document.getElementById('powerLabel');if(pl)pl.style.display='none'}
+function restart(showDraw=false){document.querySelectorAll('.cap,.status,.fxText,.ring,.obstacle,.anchorMarker,.mine,.lavaZone,.mineBoom,.mineSpark,.domainRing').forEach(e=>e.remove());obstacles=[];mines=[];lavaZones=[];minePlacement=null;winBox.style.display='none';shieldBox.style.display='none';selectingReturnPlayer=null;pendingShield=null;teleportTarget=null;plagueTargets=[];duelStarted=false;synthSlots=[];objectMove=null;duelBanner.style.display='none';nextId=1;const box=boardBox(),bx=box.left,by=box.top,bw=box.width,bh=box.height;players=[makePlayer('P1',safeSpot(bx+36,by+36),'main',null),makePlayer('P2',safeSpot(bx+bw-70,by+36),'main',null),makePlayer('P3',safeSpot(bx+36,by+bh-70),'main',null),makePlayer('P4',safeSpot(bx+bw-70,by+bh-70),'main',null)];setupMap(bx,by,bw,bh);current=0;round=1;dragging=false;actionStarted=false;animating=false;gameOver=false;usingSkill=null;movedThisTurn=false;forceNextIndex=null,plagueTargets=[],duelStarted=false,synthSlots=[],objectMove=null,windX=0,windY=0,factoryTick=0;logBox.innerHTML='';dealUniqueSkills();chooseWind();log('第 1 輪開始！目前技能數：'+skills.length+'。地圖：'+mapName());showTurnBanner();render();if(showDraw)showInitialSkillDraw()}
+function dealUniqueSkills(){const main=players.filter(p=>p.kind==='main'),deck=[...skills.filter(s=>s.type!=='rule'&&!isDrawLockedSkill(s.name))].sort(()=>Math.random()-.5);main.forEach((p,i)=>p.skills=[deck[i*3],deck[i*3+1],deck[i*3+2]])}
+
+async function showInitialSkillDraw(){
+  const overlay=document.getElementById('drawOverlay');
+  const playerText=document.getElementById('drawPlayer');
+  const cards=document.getElementById('drawCards');
+  if(!overlay||!playerText||!cards)return;
+  overlay.style.display='flex';
+  const pool=skills.filter(s=>s.type!=='rule'&&!isDrawLockedSkill(s.name));
+  const main=players.filter(p=>p.kind==='main');
+  for(const p of main){
+    playerText.textContent=p.name+' 抽取技能';
+    cards.innerHTML='';
+    for(let i=0;i<3;i++){
+      const card=document.createElement('div');
+      card.className='drawCard drawRolling';
+      cards.appendChild(card);
+      for(let r=0;r<10;r++){
+        const fake=pool[Math.floor(Math.random()*pool.length)];
+        card.className='drawCard drawRolling '+skillTierClass(fake.name);
+        card.innerHTML=`<b>${fake.name}</b><div class="drawIcon">${prettyIcon(fake.name)}</div><small>${skillTierLabel(fake.name)}<br>${fake.priority||''}</small>`;
+        await sleep(45);
+      }
+      const real=p.skills[i];
+      card.className='drawCard drawDone '+skillTierClass(real.name);
+      card.innerHTML=`<b>${real.name}</b><div class="drawIcon">${prettyIcon(real.name)}</div><small>${skillTierLabel(real.name)}<br>${real.passive?'🟢被動｜':''}${real.priority}</small>`;
+      await sleep(220);
+    }
+    await sleep(500);
+  }
+  playerText.textContent='技能抽取完成！';
+  await sleep(650);
+  overlay.style.display='none';
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function makeObstacle(x,y,w,h){const e=document.createElement('div');e.className='obstacle';e.style.left=x+'px';e.style.top=y+'px';e.style.width=w+'px';e.style.height=h+'px';world.appendChild(e);const o={x,y,w,h,el:e,move:false,dx:0,dy:0};e.addEventListener('click',ev=>{if(usingSkill&&(usingSkill.name==='搬運工'||usingSkill.name==='魔術師')){ev.stopPropagation();selectObjectForMove('obstacle',o)}});obstacles.push(o)}
+function makePlayer(name,pos,kind,masterId){const e=document.createElement('div');e.className='cap';world.appendChild(e);const s=document.createElement('div');s.className='status';world.appendChild(s);const newId=nextId++;const teamId=masterId||newId;const p={id:newId,name,x:pos.x,y:pos.y,spawnX:pos.x,spawnY:pos.y,lastX:pos.x,lastY:pos.y,roundStartX:pos.x,roundStartY:pos.y,prevRoundStartX:pos.x,prevRoundStartY:pos.y,vx:0,vy:0,dead:false,hiddenOut:false,falling:false,fallVX:0,fallVY:0,fade:1,angle:0,skills:[],killer:false,stun:0,skip:0,plague:0,plagueCaster:null,boost:0,freeze:0,foreverFreeze:false,anchor:null,anchorEl:null,domain:false,domainEl:null,butcher:false,d4cUses:3,weakTo:null,kindnessTo:null,conduct:[],ai:false,aiLevel:'rookie',kind,masterId,ownerId:masterId||newId,teamId,unitType:kind||'main',lastShotAngle:null,lastShotPower:0,el:e,statusEl:s};if(kind==='clone')e.classList.add('cloneCap');if(kind==='stand')e.classList.add('standCap');e.addEventListener('pointerdown',ev=>startDrag(ev,p));e.addEventListener('click',ev=>{ev.stopPropagation();if(usingSkill)useTargetSkill(p)});return p}
+function anchorBlockedByCap(anchorOwner){
+  if(!anchorOwner||!anchorOwner.anchor)return false;
+
+  // 錨點傳送鍵的實際顯示範圍
+  const ax=anchorOwner.anchor.x-6;
+  const ay=anchorOwner.anchor.y+3;
+  const aw=52;
+  const ah=30;
+
+  // 只要錨點傳送鍵的方框和任何瓶蓋方框重疊，就暫時不能互動
+  // 這樣錨點在玩家身上或旁邊時，不會擋住玩家拖曳移動。
+  return players.some(q=>{
+    if(q.dead||q.hiddenOut||q.falling)return false;
+    const qx=q.x;
+    const qy=q.y;
+    const qw=SIZE;
+    const qh=SIZE;
+    return ax < qx+qw && ax+aw > qx && ay < qy+qh && ay+ah > qy;
+  });
+}
+
+function createAnchorMarker(p){
+  if(p.anchorEl)p.anchorEl.remove();
+  const a=document.createElement('div');
+  a.className='anchorMarker';
+  a.textContent='⚓'+p.name;
+  world.appendChild(a);
+  p.anchorEl=a;
+
+  a.addEventListener('pointerdown',ev=>{
+    if(anchorBlockedByCap(p))return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    teleportPlayerToAnchor(p);
+  });
+
+  a.addEventListener('click',ev=>{
+    if(anchorBlockedByCap(p))return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    teleportPlayerToAnchor(p);
+  });
+
+  updateAnchorMarker(p);
+}
+
+function updateAnchorMarker(p){
+  if(!p.anchorEl||!p.anchor)return;
+  p.anchorEl.style.left=(p.anchor.x-6)+'px';
+  p.anchorEl.style.top=(p.anchor.y+3)+'px';
+  p.anchorEl.style.display=(p.dead||p.hiddenOut||p.falling)?'none':'flex';
+
+  const blocked=anchorBlockedByCap(p);
+
+  // 重點修正：被瓶蓋重疊時，錨點傳送鍵完全不能吃到滑鼠事件，
+  // 而且層級降到瓶蓋下面，避免擋住拖曳。
+  p.anchorEl.style.pointerEvents=blocked?'none':'auto';
+  p.anchorEl.style.zIndex=blocked?'1':'60';
+  p.anchorEl.style.opacity=blocked?'.32':'1';
+}
+
+function clearAnchor(p){
+  if(p.anchorEl){p.anchorEl.remove();p.anchorEl=null}
+  p.anchor=null;
+}
+
+function teleportPlayerToAnchor(p){
+  if(gameOver||animating||actionStarted||selectingReturnPlayer||pendingShield)return;
+  if(!p.anchor||p.dead||p.hiddenOut||p.falling)return;
+  const pos=findFreeSpot(p.anchor.x,p.anchor.y,p);
+  if(pointInObstacle(pos.x,pos.y)||!isFreeSpot(pos.x,pos.y,p)){
+    log('錨點位置被擋住，正在找最近可用位置。');
+  }
+  p.lastX=p.x;p.lastY=p.y;
+  p.x=pos.x;p.y=pos.y;
+  p.vx=0;p.vy=0;
+  ring(p.x+R,p.y+R);
+  text(p,'回到錨點⚓');
+  clearAnchor(p);
+  removeSkillByName(p,'錨點');
+  if(p===players[current]&&!gameOver)autoNext();else render();
+}
+function hasSkill(p,n){return p.skills.some(s=>s.name===n)}function removeSkillByName(p,n){const i=p.skills.findIndex(s=>s.name===n);if(i>=0)p.skills.splice(i,1)}function groupId(p){return p.teamId||p.masterId||p.id}function sameTeam(a,b){return !!(a&&b&&groupId(a)===groupId(b))}function aliveGroups(includeHidden=false){const set=new Set();players.forEach(p=>{if(!p.dead&&(includeHidden||!p.hiddenOut))set.add(groupId(p))});return[...set]}function isDuel(){return aliveGroups(true).length===2}function checkDuel(){if(!duelStarted&&!gameOver&&isDuel()){duelStarted=true;const hidden=players.some(p=>p.hiddenOut&&!p.dead);if(!hidden){duelBanner.style.display='block';duelBanner.textContent='絕地死鬥!';setTimeout(()=>{duelBanner.style.display='none'},1450)}log(hidden?'絕地死鬥判定成立（保護色中，不顯示大字）。':'絕地死鬥！瘟疫在決鬥時只能鎖定 1 人。')}}function activePlayers(){return players.filter(p=>!p.dead&&!p.hiddenOut)}
+function anchorAtClientPoint(clientX,clientY){
+  for(const q of players){
+    if(q.dead||q.hiddenOut||q.falling)continue;
+    const cx=q.x+R,cy=q.y+R;
+    const w=world.getBoundingClientRect();
+    const px=clientX-w.left,py=clientY-w.top;
+    if(Math.hypot(px-cx,py-cy)<R*1.4)return null;
+  }
+  for(const p of players){
+    if(!p.anchor||!p.anchorEl||p.dead||p.hiddenOut||p.falling||anchorBlockedByCap(p))continue;
+    const r=p.anchorEl.getBoundingClientRect();
+    if(clientX>=r.left-6&&clientX<=r.right+6&&clientY>=r.top-6&&clientY<=r.bottom+6)return p;
+  }
+  return null;
+}
+world.addEventListener('pointerdown',ev=>{
+  const p=anchorAtClientPoint(ev.clientX,ev.clientY);
+  if(!p)return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  teleportPlayerToAnchor(p);
+},true);
+function sameOriginal(a,b){return sameTeam(a,b)}
+
+function insertSummon(owner,unit){
+  unit.teamId=groupId(owner);unit.ownerId=owner.id;
+  const ownerIndex=players.indexOf(owner);
+  let insertAt=ownerIndex+1;
+  // 本體 → 克隆 → 替身；同隊召喚物依召喚順序排在本體後面
+  while(insertAt<players.length&&groupId(players[insertAt])===groupId(owner)){
+    const k=players[insertAt].kind;
+    if(unit.kind==='clone'){if(k==='clone')insertAt++;else break;}
+    else if(unit.kind==='stand'){if(k==='clone'||k==='stand')insertAt++;else break;}
+    else insertAt++;
+  }
+  players.splice(insertAt,0,unit);
+}
+
+function startDrag(e,p){if(gameOver||animating||actionStarted||usingSkill||movedThisTurn||selectingReturnPlayer||pendingShield||minePlacement)return;if(p!==players[current]||p.dead||p.hiddenOut)return;if(p.foreverFreeze){text(p,'永凍不能動！');return}e.preventDefault();e.stopPropagation();p.lastX=p.x;p.lastY=p.y;dragging=true;dragPlayer=p;dragPointerId=e.pointerId;dragStart={x:p.x+R,y:p.y+R};dragDown=worldPoint(e);dragMoved=false;dragNow=worldPoint(e);try{p.el.setPointerCapture(e.pointerId)}catch(err){}arrow.style.display='block';showLastPowerArrow();updateArrow()}
+window.addEventListener('pointermove',e=>{if(!dragging)return;if(dragPointerId!==null&&e.pointerId!==dragPointerId)return;const pt=worldPoint(e);if(Math.hypot(pt.x-dragDown.x,pt.y-dragDown.y)>5)dragMoved=true;dragNow=pt;updateArrow()});window.addEventListener('pointerup',e=>{if(!dragging)return;if(dragPointerId!==null&&e.pointerId!==dragPointerId)return;const p=dragPlayer||players[current];try{p.el.releasePointerCapture(dragPointerId)}catch(err){}let dx=dragStart.x-dragNow.x,dy=dragStart.y-dragNow.y,len=Math.hypot(dx,dy);cancelDrag();if(!p||p.dead||p.hiddenOut)return;if(len<15){text(p,'取消');return}if(len>MAX_PULL){dx=dx/len*MAX_PULL;dy=dy/len*MAX_PULL;len=MAX_PULL}lastPower=Math.min(200,Math.round(len/POWER_100_PULL*100));p.lastShotPower=lastPower;p.lastShotAngle=Math.atan2(dy,dx);let multi=1;if(currentMap==='space')multi*=1.35;if(p.boost>0){multi*=p.boost;p.boost=0;text(p,'暴衝！','red')}if(p.freeze>0&&p.freeze<=10)multi*=.5;if(p.freeze>0&&p.freeze<=5)multi*=.1;p.vx=dx*BASE_POWER*multi;p.vy=dy*BASE_POWER*multi;movedThisTurn=true;actionStarted=true;animating=true;text(p,'發射！')});window.addEventListener('pointercancel',cancelDrag);window.addEventListener('blur',cancelDrag);
+world.addEventListener('click',e=>{const pt=worldPoint(e);if(objectMove){if(moveSelectedObjectTo(pt))return}if(minePlacement){placeMineAtClick(pt);return}if(selectingReturnPlayer){const p=selectingReturnPlayer,pos=findFreeSpot(pt.x-R,pt.y-R,p);if(pointInObstacle(pos.x,pos.y)||!isFreeSpot(pos.x,pos.y,p)){log('不能回到障礙物或其他瓶蓋上！');return}p.hiddenOut=false;p.x=pos.x;p.y=pos.y;text(p,'現身！');selectingReturnPlayer=null;checkWin();if(!gameOver)nextTurn();render();return}if(usingSkill&&usingSkill.name==='D4C'){const user=players[current];const pos=findFreeSpot(pt.x-R,pt.y-R,null);if(!isFreeSpot(pos.x,pos.y,null)){log('D4C 不能放在人身上、障礙物或太靠近玩家。');return}const c=makePlayer(user.name+' 克隆',pos,'clone',user.id);c.skills=user.skills;insertSummon(user,c);text(c,'D4C 克隆!','#60a5fa');usingSkill.usesLeft=(usingSkill.usesLeft||3)-1;if(usingSkill.usesLeft<=0){usingSkill.forceRemove=true;finishSkill();autoNext()}else{text(user,'D4C 剩 '+usingSkill.usesLeft+' 次','#c4b5fd');render()}return}if(usingSkill&&usingSkill.name==='瞬間移動'&&teleportTarget){const pos=findFreeSpot(pt.x-R,pt.y-R,teleportTarget);if(pointInObstacle(pos.x,pos.y)||!isFreeSpot(pos.x,pos.y,teleportTarget)){log('不能傳送到障礙物或其他瓶蓋上！');return}teleportTarget.lastX=teleportTarget.x;teleportTarget.lastY=teleportTarget.y;teleportTarget.x=pos.x;teleportTarget.y=pos.y;text(teleportTarget,'瞬移！');teleportTarget=null;finishSkill();render();return}
+});
+function skipTurnButton(){if(usingSkill||minePlacement||objectMove||selectingReturnPlayer||pendingShield||dragging||animating||actionStarted||movedThisTurn||gameOver)return;const cp=players[current];if(cp&&!cp.dead&&!cp.hiddenOut){text(cp,'跳過回合','#cbd5e1');autoNext()}}
+function updateArrow(){const dx=dragStart.x-dragNow.x,dy=dragStart.y-dragNow.y,len=Math.min(Math.hypot(dx,dy),MAX_PULL),pct=Math.min(200,Math.round(len/POWER_100_PULL*100)),ang=Math.atan2(dy,dx);arrow.style.left=dragStart.x+'px';arrow.style.top=dragStart.y+'px';arrow.style.width=Math.max(34,len)+'px';arrow.style.transform=`rotate(${ang}rad)`;arrow.style.setProperty('--power',Math.min(100,pct/2)+'%');arrow.classList.toggle('maxPower',pct>=200);const pl=document.getElementById('powerLabel');if(pl){const p=dragPlayer||players[current];pl.style.display='block';pl.classList.toggle('cancelPower',pct<16);const last=(p&&p.lastShotPower)?'｜上次 '+p.lastShotPower+'%':'';pl.textContent=pct<16?'鬆開可取消':('力道 '+pct+'%'+last);const mid=Math.max(48,len*.58);const px=dragStart.x+Math.cos(ang)*mid+Math.cos(ang-Math.PI/2)*34;const py=dragStart.y+Math.sin(ang)*mid+Math.sin(ang-Math.PI/2)*34;pl.style.left=px+'px';pl.style.top=py+'px'}}
+function showLastPowerArrow(){const la=document.getElementById('lastArrow');if(la)la.style.display='none'}
+function emergencyStopMotion(){
+  players.forEach(p=>{
+    p.vx=0;p.vy=0;
+    if(p.falling&&!p.dead){p.falling=false;p.el.style.transform='';p.el.style.opacity='';p.statusEl.style.opacity='';finishDeath(p)}
+  });
+  log('防卡住：自動結束移動判定。');
+}
+function gameLoop(){
+  if(animating){
+    animFrameCount++;
+    updatePhysics();
+    render();
+    if(allStopped()||animFrameCount>360){
+      if(animFrameCount>360)emergencyStopMotion();
+      animFrameCount=0;
+      animating=false;
+      actionStarted=false;
+      checkOut();
+      checkWin();
+      if(!gameOver)nextTurn();
+    }
+  }else animFrameCount=0;
+  requestAnimationFrame(gameLoop)
+}
+function updatePhysics(){updateMapForces();const fr=currentFriction();let maxSpeed=0;players.forEach(p=>{if(!p.dead&&!p.hiddenOut&&!p.falling)maxSpeed=Math.max(maxSpeed,Math.hypot(p.vx,p.vy))});const steps=Math.max(1,Math.ceil(maxSpeed/9));for(let step=0;step<steps;step++){for(const p of players){if(p.dead||p.hiddenOut||p.falling)continue;p.x+=p.vx/steps;p.y+=p.vy/steps}resolveCapCollisions();resolveObstacleCollisions();checkMines();checkConductLinks();checkDomains();checkMapHazards();checkOut()}for(const p of players){if(p.dead||p.hiddenOut||p.falling)continue;p.vx*=fr;p.vy*=fr;if(Math.hypot(p.vx,p.vy)<MIN_SPEED){p.vx=0;p.vy=0}}updateFalling()}
+function canKill(attacker,victim){
+  if(!attacker||!victim)return true;
+  if(sameTeam(attacker,victim)){text(attacker,'同隊不能淘汰!','#93c5fd');return false}
+  return true
+}
+function resolveCapCollisions(){for(let loop=0;loop<3;loop++){for(let i=0;i<players.length;i++)for(let j=i+1;j<players.length;j++){const a=players[i],b=players[j];if(a.dead||b.dead||a.hiddenOut||b.hiddenOut||a.falling||b.falling)continue;let dx=(b.x+R)-(a.x+R),dy=(b.y+R)-(a.y+R),d=Math.hypot(dx,dy);if(d===0)d=1;if(d<R*2){const nx=dx/d,ny=dy/d,overlap=R*2-d;a.x-=nx*overlap/2;a.y-=ny*overlap/2;b.x+=nx*overlap/2;b.y+=ny*overlap/2;if(a.killer||a.butcher){if(!a.butcher)a.killer=false;if(sameOriginal(a,b))text(b,'不能殺自己！');else if(!canKill(a,b)){}else if(round===1)text(b,'第1輪不能殺！');else{text(b,a.butcher?'被屠夫擊殺！':'被暗殺！');kill(b)}}if(b.killer||b.butcher){if(!b.butcher)b.killer=false;if(sameOriginal(b,a))text(a,'不能殺自己！');else if(!canKill(b,a)){}else if(round===1)text(a,'第1輪不能殺！');else{text(a,b.butcher?'被屠夫擊殺！':'被暗殺！');kill(a)}}const av=a.vx*nx+a.vy*ny,bv=b.vx*nx+b.vy*ny,power=(av-bv)*.85;if(power>0){a.vx-=nx*power;a.vy-=ny*power;b.vx+=nx*power;b.vy+=ny*power;text(b,'被撞飛!');ring(b.x+R,b.y+R)}}}}}
+function resolveObstacleCollisions(){for(const p of players){if(p.dead||p.hiddenOut||p.falling)continue;for(const o of obstacles){const cx=p.x+R,cy=p.y+R,nearestX=Math.max(o.x,Math.min(cx,o.x+o.w)),nearestY=Math.max(o.y,Math.min(cy,o.y+o.h));let dx=cx-nearestX,dy=cy-nearestY,d=Math.hypot(dx,dy);if(d<R){if(d===0){const left=Math.abs(cx-o.x),right=Math.abs(cx-(o.x+o.w)),top=Math.abs(cy-o.y),bottom=Math.abs(cy-(o.y+o.h)),m=Math.min(left,right,top,bottom);if(m===left){dx=-1;dy=0}else if(m===right){dx=1;dy=0}else if(m===top){dx=0;dy=-1}else{dx=0;dy=1}d=1}const nx=dx/d,ny=dy/d,overlap=R-d;p.x+=nx*(overlap+2);p.y+=ny*(overlap+2);const dot=p.vx*nx+p.vy*ny;if(dot<0){p.vx-=2*dot*nx;p.vy-=2*dot*ny;if(currentMap==='bounce'){p.vx*=1.25;p.vy*=1.25;text(p,'彈射回彈!');playShockwave(p.x+R,p.y+R)}else{p.vx*=.35;p.vy*=.35;text(p,'撞障礙!');ring(p.x+R,p.y+R)}}}}}}
+
+function toggleDomain(p){if(p.domain){p.domain=false;if(p.domainEl){p.domainEl.remove();p.domainEl=null}text(p,'領域解除','#7dd3fc');return}if(p.domainEl){p.domainEl.remove();p.domainEl=null}p.domain=true;const el=document.createElement('div');el.className='domainRing';world.appendChild(el);p.domainEl=el;text(p,'絕對領域展開','#7dd3fc')}
+function updateDomains(){players.forEach(p=>{if(p.domain&&p.domainEl&&!p.dead&&!p.hiddenOut){const rad=72;p.domainEl.style.left=(p.x+R-rad)+'px';p.domainEl.style.top=(p.y+R-rad)+'px';p.domainEl.style.width=(rad*2)+'px';p.domainEl.style.height=(rad*2)+'px'}else if(p.domainEl){p.domainEl.remove();p.domainEl=null;p.domain=false}})}
+function checkDomains(){players.forEach(owner=>{if(!owner.domain||owner.dead||owner.hiddenOut)return;const rad=72,ocx=owner.x+R,ocy=owner.y+R;players.forEach(p=>{if(p===owner||p.dead||p.hiddenOut||p.falling)return;let dx=(p.x+R)-ocx,dy=(p.y+R)-ocy,d=Math.hypot(dx,dy)||1;if(d<rad+R&&d>rad-R*1.3){const nx=dx/d,ny=dy/d;p.x=ocx+nx*(rad+R)-R;p.y=ocy+ny*(rad+R)-R;p.vx+=nx*1.4;p.vy+=ny*1.4;ring(p.x+R,p.y+R);text(p,'被領域推開!','#7dd3fc')}})})}
+function checkConductLinks(){conductLinks=conductLinks.filter(l=>{const a=players.find(p=>p.id===l.a),b=players.find(p=>p.id===l.b);if(!a||!b||a.dead||b.dead)return false;if(Math.hypot((a.x+R)-(b.x+R),(a.y+R)-(b.y+R))<R*2+3){text(a,'導電爆發!','#fde047');text(b,'導電爆發!','#fde047');kill(a);kill(b);return false}return true})}
+function allStopped(){return players.every(p=>p.dead||p.hiddenOut||(!p.falling&&Math.hypot(p.vx,p.vy)<=MIN_SPEED))}
+function checkOut(){const b=boardBox();for(const p of players){if(p.dead||p.hiddenOut||p.falling)continue;const cx=p.x+R,cy=p.y+R;if(cx<b.left||cx>b.right||cy<b.top||cy>b.bottom){if(round===1){text(p,'第1輪保護!');p.vx=0;p.vy=0;const pos=safeSpot(p.x,p.y);p.x=pos.x;p.y=pos.y}else{text(p,'掉出桌!');kill(p,true)}}}}
+function timeReverseAnimation(player,targetX,targetY){const sx=player.x,sy=player.y;let i=0;const steps=18;player.vx=0;player.vy=0;const timer=setInterval(()=>{const trail=document.createElement('div');trail.className='timeTrail';trail.style.left=player.x+'px';trail.style.top=player.y+'px';world.appendChild(trail);setTimeout(()=>trail.remove(),450);i++;player.x=sx+(targetX-sx)*i/steps;player.y=sy+(targetY-sy)*i/steps;render();if(i>=steps){clearInterval(timer);const flash=document.createElement('div');flash.className='timeFlash';flash.style.left=(player.x-28)+'px';flash.style.top=(player.y-28)+'px';world.appendChild(flash);setTimeout(()=>flash.remove(),550);text(player,'⏪ 時空回溯!');}},18)}
+function kill(p,fall=false){if(round===1){text(p,'第1輪不能殺!');return}if(hasSkill(p,'復活')){removeSkillByName(p,'復活');p.x=p.spawnX;p.y=p.spawnY;p.vx=0;p.vy=0;text(p,'復活回出生點!');return}if(hasSkill(p,'時空回溯')){removeSkillByName(p,'時空回溯');forceNextIndex=players.indexOf(p);const tx=(p.prevRoundStartX??p.spawnX),ty=(p.prevRoundStartY??p.spawnY);timeReverseAnimation(p,tx,ty);return}if(fall){startFall(p);return}finishDeath(p)}
+function clearPlaguesByCaster(caster){players.forEach(t=>{if(t.plagueCaster===caster.id){t.plague=0;t.plagueCaster=null;t.el.style.background='white';text(t,'瘟疫解除!')}})}
+function startFall(p){if(p.falling||p.dead)return;p.falling=true;p.fade=1;let sp=Math.hypot(p.vx,p.vy);if(sp<1){const b=boardBox(),cx=b.left+b.width/2,cy=b.top+b.height/2;let dx=(p.x+R)-cx,dy=(p.y+R)-cy,d=Math.hypot(dx,dy)||1;p.fallVX=dx/d*3;p.fallVY=dy/d*3}else{p.fallVX=p.vx*1.35;p.fallVY=p.vy*1.35}p.vx=0;p.vy=0;p.angle=0;text(p,'掉入虛空!')}
+function updateFalling(){for(const p of players){if(!p.falling||p.dead)continue;p.x+=p.fallVX;p.y+=p.fallVY;p.fallVX*=0.985;p.fallVY*=0.985;p.angle+=Math.hypot(p.fallVX,p.fallVY)*2.5;p.fade-=0.012;p.el.style.opacity=Math.max(0,p.fade);p.statusEl.style.opacity=Math.max(0,p.fade);p.el.style.transform='rotate('+p.angle+'deg)';if(p.fade<=0){p.falling=false;p.el.style.transform='';p.el.style.opacity='';p.statusEl.style.opacity='';finishDeath(p);checkWin()}}}
+function finishDeath(p){if(p.dead)return;clearAnchor(p);p.dead=true;p.falling=false;log(p.name+' 淘汰!');clearPlaguesByCaster(p);if(p.kind==='main'||p.kind==='clone'){players.forEach(t=>{if(t.masterId===p.id&&t.kind==='stand'&&!t.dead){finishDeath(t);text(t,'本體死亡!')}})}}
+function startNewRound(){round++;players.forEach(p=>{if(!p.dead&&!p.hiddenOut&&!p.falling){p.prevRoundStartX=(p.roundStartX??p.x);p.prevRoundStartY=(p.roundStartY??p.y);p.roundStartX=p.x;p.roundStartY=p.y;}});log('第 '+round+' 輪開始!｜地圖：'+mapName());chooseWind()}
+function nextTurn(){if(forceNextIndex!==null&&players[forceNextIndex]&&!players[forceNextIndex].dead&&!players[forceNextIndex].foreverFreeze){current=forceNextIndex;forceNextIndex=null,plagueTargets=[],duelStarted=false,synthSlots=[],objectMove=null,windX=0,windY=0,factoryTick=0;movedThisTurn=false;showTurnBanner();render();return}handlePlague(players[current]);handleFreeze(players[current]);if(players[current].stun>0)players[current].stun--;if(checkNeedHiddenReturn())return;current++;if(current>=players.length){current=0;startNewRound()}let guard=0;while((players[current].dead||players[current].hiddenOut||players[current].skip>0||players[current].foreverFreeze)&&guard<100){if(players[current].skip>0&&!players[current].dead&&!players[current].hiddenOut){players[current].skip--;log(players[current].name+' 被跳過一回!')}if(players[current].foreverFreeze&&!players[current].dead&&!players[current].hiddenOut){log(players[current].name+' 被永凍，跳過回合!')}current++;if(current>=players.length){current=0;startNewRound()}guard++}movedThisTurn=false;if(checkNeedHiddenReturn())return;checkWin();if(!gameOver){checkDuel();showTurnBanner();render()}}
+function checkNeedHiddenReturn(){const groups=aliveGroups(),hidden=players.filter(p=>p.hiddenOut&&!p.dead);if(groups.length<=1&&hidden.length>0){selectingReturnPlayer=hidden[0];banner.textContent=selectingReturnPlayer.name+' 選擇回場位置';banner.style.display='block';log(selectingReturnPlayer.name+' 請點桌面選擇回場位置。');render();return true}return false}
+function handlePlague(p){if(p.dead||p.hiddenOut)return;if(p.plague>0){const caster=players.find(x=>x.id===p.plagueCaster);if(!caster||caster.dead){p.plague=0;p.plagueCaster=null;p.el.style.background='white';text(p,'瘟疫解除!');return}p.plague--;updatePlagueColor(p);text(p,'瘟疫 '+p.plague);if(p.plague===0){p.plagueCaster=null;p.el.style.background='white';text(p,'瘟疫爆發!');kill(p)}}}
+function handleFreeze(p){if(p.dead||p.hiddenOut||p.foreverFreeze)return;if(p.freeze>0){p.freeze--;if(p.freeze===8)text(p,'冷凍-50%');if(p.freeze===5)text(p,'冷凍-240%');if(p.freeze===0){p.foreverFreeze=true;text(p,'永凍!')}}}
+function updatePlagueColor(p){if(p.plague>=4)p.el.style.background='#bbf7d0';else if(p.plague===3)p.el.style.background='#22c55e';else if(p.plague===2)p.el.style.background='#166534';else if(p.plague===1)p.el.style.background='#064e3b';else p.el.style.background='white'}
+function showTurnBanner(){banner.textContent='第 '+round+' 輪｜'+players[current].name+' 的回合';banner.style.display='block';setTimeout(()=>{if(!selectingReturnPlayer)banner.style.display='none'},800)}
+
+function skillByName(n){return skills.find(s=>s.name===n)}
+function clearBadEffects(t){t.stun=0;t.skip=0;t.plague=0;t.plagueCaster=null;t.freeze=0;t.foreverFreeze=false;t.killer=false;t.butcher=false;t.boost=0;t.weakTo=null;t.kindnessTo=null;if(t.el)t.el.style.background='white'}
+function reviveAsAlly(target,user){target.dead=false;target.hiddenOut=false;target.falling=false;target.fade=1;target.el.style.opacity='';target.statusEl.style.opacity='';target.kind='stand';target.masterId=user.id;clearBadEffects(target);const pos=findFreeSpot(user.x+48,user.y+48,target);target.x=pos.x;target.y=pos.y;target.vx=0;target.vy=0;text(target,'被淨化復活!','#86efac')}
+
+function playSynthesisEffect(user,result,parts=[]){
+  const overlay=document.getElementById('synthOverlay');
+  if(!overlay)return;
+  const banner=overlay.querySelector('.synthBanner');
+  banner.textContent='━━━━━━━━━\n終極合成！\n'+(parts.length?parts.join(' + ')+'\n↓\n':'')+result+'\n━━━━━━━━━';
+  overlay.querySelectorAll('.synthFusionCard,.synthFusionRing,.synthRune,.synthSummary').forEach(e=>e.remove());
+  overlay.classList.remove('show');void overlay.offsetWidth;overlay.classList.add('show');
+  const symbols=[prettyIcon(parts[0]||result),prettyIcon(parts[1]||result)];
+  const starts=[[-210,-20,-14],[210,25,14]];
+  starts.forEach((st,i)=>{const c=document.createElement('div');c.className='synthFusionCard';c.innerHTML=symbols[i]||'✦';c.style.setProperty('--sx',st[0]+'px');c.style.setProperty('--sy',st[1]+'px');c.style.setProperty('--rot',st[2]+'deg');overlay.appendChild(c);});
+
+  const resultCard=document.createElement('div');
+  resultCard.className='synthFusionCard synthResultCard';
+  resultCard.innerHTML=prettyIcon(result)||'✦';
+  resultCard.style.setProperty('--sx','0px');
+  resultCard.style.setProperty('--sy','0px');
+  resultCard.style.setProperty('--rot','0deg');
+  resultCard.style.animationDelay='1.45s';
+  overlay.appendChild(resultCard);
+    const ring=document.createElement('div');ring.className='synthFusionRing';overlay.appendChild(ring);
+  for(let i=0;i<42;i++){const r=document.createElement('div');r.className='synthRune';const a=Math.random()*Math.PI*2,d=80+Math.random()*180;r.style.left='50%';r.style.top='50%';r.style.setProperty('--dx',Math.cos(a)*d+'px');r.style.setProperty('--dy',Math.sin(a)*d+'px');overlay.appendChild(r)}
+  if(user){ultimateBeamAt(user,'#fef08a');burstParticles(user.x+R,user.y+R,'#facc15',38)}
+  screenShake();
+  setTimeout(()=>overlay.classList.remove('show'),6200);
+}
+
+function isCrystalSkill(n){return ['時間水晶','複製水晶'].includes(n)}function synthRecipe(a,b){const pair=[a,b].sort().join('+');const left=['防護罩','搬運工','解藥'];const right=['復活','失落的十字架'];if((left.includes(a)&&right.includes(b))||(left.includes(b)&&right.includes(a)))return '淨化';if(pair===['交換','瞬間移動'].sort().join('+'))return '魔術師';if(pair===['交換','搬運工'].sort().join('+'))return '魔術師';if((a==='殺手'&&isCrystalSkill(b))||(b==='殺手'&&isCrystalSkill(a)))return '屠夫';if((a==='時空回溯'&&isCrystalSkill(b))||(b==='時空回溯'&&isCrystalSkill(a)))return '時空支配';if((a==='克隆'&&isCrystalSkill(b))||(b==='克隆'&&isCrystalSkill(a)))return 'D4C';return null}
+function addToSynthesis(skillName){const p=players[current];if(!p||!hasSkill(p,skillName)){log('你目前沒有 '+skillName);return}if(synthSlots.includes(skillName)){log('這個技能已經放進合成欄。');return}if(synthSlots.length>=2)synthSlots=[];synthSlots.push(skillName);if(synthSlots.length===2){const result=synthRecipe(synthSlots[0],synthSlots[1]);if(result){const parts=[synthSlots[0],synthSlots[1]];removeSkillByName(p,synthSlots[0]);removeSkillByName(p,synthSlots[1]);const rs=skillByName(result);if(rs)p.skills.push({...rs});if(skillTierClass(result)==='skill-ultimate')playSynthesisEffect(p,result,parts);text(p,'合成：'+result+'!','#facc15');log(p.name+' 合成了 '+result+'！')}else{log('這兩個技能無法合成。')}synthSlots=[]}render()}
+function clearSynthesis(){synthSlots=[];render()}
+function rectInsideBoard(x,y,w,h){const b=boardBox();return x>=b.left+8&&y>=b.top+8&&x+w<=b.right-8&&y+h<=b.bottom-8}
+function rectNearPlayers(x,y,w,h,ignore=null,margin=34){return players.some(p=>p!==ignore&&!p.dead&&!p.hiddenOut&&!p.falling&&circleRectNear(p.x+R,p.y+R,R+margin,x,y,w,h))}
+function circleRectNear(cx,cy,r,x,y,w,h){const nx=Math.max(x,Math.min(cx,x+w)),ny=Math.max(y,Math.min(cy,y+h));return Math.hypot(cx-nx,cy-ny)<r}
+function obstacleSpotOK(o,x,y){return rectInsideBoard(x,y,o.w,o.h)&&!rectNearPlayers(x,y,o.w,o.h,null,26)}
+function selectObjectForMove(kind,obj){if(!usingSkill)return;if(kind==='player'&&usingSkill.name!=='魔術師')return;objectMove={kind,obj};text(players[current],kind==='player'?'選玩家位置':'選障礙物位置','#c4b5fd');render()}
+function finishObjectMoveSkill(){if(!usingSkill)return;const cost=usingSkill.priority==='⭕圈圈級';finishSkill();objectMove=null;if(cost)autoNext();else render()}
+function moveSelectedObjectTo(pt){if(!objectMove||!usingSkill)return false;const user=players[current];if(objectMove.kind==='player'){const t=objectMove.obj;const oldX=t.x+R,oldY=t.y+R;const pos=findFreeSpot(pt.x-R,pt.y-R,t);if(!isFreeSpot(pos.x,pos.y,t)){log('不能放在人身上、障礙物或太靠近玩家。');return true}if(usingSkill.name==='魔術師')magicEffectAt(oldX,oldY);t.lastX=t.x;t.lastY=t.y;t.x=pos.x;t.y=pos.y;if(usingSkill.name==='魔術師')magicEffectAt(t.x+R,t.y+R);text(t,'被移動!','#c4b5fd')}else{const o=objectMove.obj;const oldX=o.x+o.w/2,oldY=o.y+o.h/2;let x=pt.x-o.w/2,y=pt.y-o.h/2;const b=boardBox();x=Math.max(b.left+8,Math.min(b.right-o.w-8,x));y=Math.max(b.top+8,Math.min(b.bottom-o.h-8,y));if(!obstacleSpotOK(o,x,y)){log('不能把障礙物放在人身上或太靠近玩家。');return true}if(usingSkill.name==='魔術師')magicEffectAt(oldX,oldY);o.x=x;o.y=y;o.el.style.left=x+'px';o.el.style.top=y+'px';if(usingSkill.name==='魔術師')magicEffectAt(o.x+o.w/2,o.y+o.h/2);floatingTextAt(x,y-18,'移動障礙','#c4b5fd')}objectMove=null;if(usingSkill.name==='搬運工'){usingSkill.movesLeft=(usingSkill.movesLeft||2)-1;if(usingSkill.movesLeft>0){text(user,'還能搬 '+usingSkill.movesLeft+' 次','#c4b5fd');render();return true}}if(usingSkill.name==='魔術師'){usingSkill.movesLeft=(usingSkill.movesLeft||6)-1;if(usingSkill.movesLeft>0){text(user,'魔術師還能移動 '+usingSkill.movesLeft+' 次','#86efac');render();return true}}finishObjectMoveSkill();return true}
+function useSkill(i){if(gameOver||animating||actionStarted||selectingReturnPlayer||pendingShield||minePlacement)return;const p=players[current];if(p.foreverFreeze){text(p,'永凍跳過!');return}const s=p.skills[i];if(!s||s.passive)return;if(p.stun>0&&skillTierClass(s.name)!=='skill-ultimate'){text(p,'不能用技!');return}if(s.name==='時間水晶'){if(p.skills.length<=1){text(p,'沒有可操作的手牌!','#67e8f9');return}const doReroll=confirm('時間水晶：按「確定」重抽一張手牌，按「取消」複製一張手牌。');usingSkill={...s,index:i,copyHand:!doReroll,rerollHand:doReroll};text(p,doReroll?'選 1 張手牌重抽':'選 1 張手牌複製','#67e8f9');render();return}if(s.name==='複製水晶'){text(p,'複製水晶主要用於合成','#67e8f9');return}if(s.name==='暴衝'){usingSkill={...s,index:i};text(p,'選擇要暴衝的玩家','#fb923c');render();return}if(s.name==='屠夫'){p.butcher=!p.butcher;text(p,p.butcher?'屠夫啟動!':'屠夫解除!','#86efac');render();return}if(s.name==='絕對領域'){toggleDomain(p);render();return}if(s.name==='D4C'){usingSkill={...s,index:i,usesLeft:(s.uses||3)};text(p,'選擇克隆位置','#c4b5fd');render();return}if(s.name==='殺手'){p.killer=true;text(p,'殺手!');removeSkill(i);autoNext();return}if(s.name==='保護色'){p.hiddenOut=true;p.vx=0;p.vy=0;text(p,'隱身出局!');removeSkill(i);autoNext();return}if(s.name==='衝擊波'){shockwave(p);removeSkill(i);actionStarted=true;animating=true;return}if(s.name==='解藥'){p.stun=0;p.plague=0;p.freeze=0;p.foreverFreeze=false;p.el.style.background='white';text(p,'解藥!');removeSkill(i);return}if(s.name==='全部不可動'){players.forEach(t=>{if(t!==p&&!t.dead&&!t.hiddenOut)t.skip=1});text(p,'全體不可動!');removeSkill(i);render();return}if(s.name==='替身'){summonStands(p);removeSkill(i);autoNext();return}if(s.name==='克隆'){summonClone(p);removeSkill(i);autoNext();return}if(s.name==='錨點'){useAnchorSkill(p,i);return}if(s.name==='地雷'){startMinePlacement(p,i);return}if(s.name==='搬運工'){usingSkill={...s,index:i,movesLeft:2};text(p,'選要搬的障礙物','#c4b5fd');render();return}if(s.name==='魔術師'){playUltimateIntro(p,'魔術師');usingSkill={...s,index:i,movesLeft:6};text(p,'選玩家或障礙物','#86efac');render();return}if(s.name==='淨化'){playUltimateIntro(p,'淨化');usingSkill={...s,index:i,cleanseTargets:[]};text(p,'選多名目標，最後按完成淨化','#86efac');render();return}if(s.name==='失落的十字架'){usingSkill={...s,index:i};text(p,'選擇要復活的淘汰者','#93c5fd');return}if(s.name==='瘟疫'&&round===1){text(p,'第1輪不能用!');log('瘟疫第 1 輪不能使用，不消耗。');return}if(s.name==='瘟疫')plagueTargets=[];usingSkill={...s,index:i};text(p,s.type==='teleport'?'選要瞬移的玩家':'選目標')}
+function useAnchorSkill(p,i){if(!p.anchor){p.anchor={x:p.x,y:p.y};createAnchorMarker(p);text(p,'錨點設置⚓');autoNext();return}else{teleportPlayerToAnchor(p);return}}
+
+function mineHitsCap(x,y,margin=0){const cx=x+13,cy=y+13;return players.some(p=>!p.dead&&!p.hiddenOut&&!p.falling&&Math.hypot((p.x+R)-cx,(p.y+R)-cy)<R+13+margin)}
+function mineOnObstacle(x,y){const cx=x+13,cy=y+13;return obstacles.some(o=>cx>o.x-8&&cx<o.x+o.w+8&&cy>o.y-8&&cy<o.y+o.h+8)}
+function mineInsideBoard(x,y){const b=boardBox(),cx=x+13,cy=y+13;return cx>b.left+13&&cx<b.right-13&&cy>b.top+13&&cy<b.bottom-13}
+function mineOverlapsMine(x,y){const cx=x+13,cy=y+13;return mines.some(m=>!m.used&&Math.hypot((m.x+13)-cx,(m.y+13)-cy)<32)}
+function canPlaceMine(x,y){return mineInsideBoard(x,y)&&!mineOnObstacle(x,y)&&!mineHitsCap(x,y,34)&&!mineOverlapsMine(x,y)}
+function startMinePlacement(player,skillIndex){minePlacement={player,skillIndex,count:0};text(player,'放置地雷 1/3');log(player.name+' 開始放置三顆地雷。')}
+function placeMineAtClick(pt){if(!minePlacement)return;const x=pt.x-13,y=pt.y-13;if(!canPlaceMine(x,y)){log('不能把地雷放在玩家身上、玩家旁邊、障礙物或虛空。');return}const el=document.createElement('div');el.className='mine';el.title='地雷';el.style.left=x+'px';el.style.top=y+'px';world.appendChild(el);mines.push({x,y,el,ownerId:minePlacement.player.id,used:false});minePlacement.count++;floatingTextAt(x,y-18,'💣 地雷','red');if(minePlacement.count<3){text(minePlacement.player,'放置地雷 '+(minePlacement.count+1)+'/3');return}const owner=minePlacement.player,idx=minePlacement.skillIndex;minePlacement=null;if(players[current]===owner){removeSkill(idx);autoNext()}else render()}
+function checkMines(){for(const m of mines){if(m.used)continue;const mx=m.x+13,my=m.y+13;for(const p of players){if(p.dead||p.hiddenOut||p.falling)continue;const d=Math.hypot((p.x+R)-mx,(p.y+R)-my);if(d<R+13){explodeMine(m,p);break}}}}
+function mineExplosion(x,y){
+  const boom=document.createElement('div');
+  boom.className='mineBoom';
+  boom.style.left=x+'px';boom.style.top=y+'px';
+  world.appendChild(boom);
+  setTimeout(()=>boom.remove(),560);
+  for(let i=0;i<14;i++){
+    const sp=document.createElement('div');
+    sp.className='mineSpark';
+    sp.style.left=(x-4)+'px';sp.style.top=(y-4)+'px';
+    const a=Math.PI*2*i/14,dist=55+Math.random()*38;
+    sp.style.setProperty('--dx',Math.cos(a)*dist+'px');
+    sp.style.setProperty('--dy',Math.sin(a)*dist+'px');
+    world.appendChild(sp);
+    setTimeout(()=>sp.remove(),520);
+  }
+}
+function explodeMine(m,p){if(m.used)return;m.used=true;const ex=m.x+13,ey=m.y+13;if(m.el){m.el.style.transform='scale(1.9)';m.el.style.opacity='0';setTimeout(()=>m.el&&m.el.remove(),180)}mineExplosion(ex,ey);floatingTextAt(m.x-14,m.y-30,'💥 地雷爆炸!','#f97316');kill(p)}
+function summonStands(p){const pos1=findFreeSpot(p.x-45,p.y),a=makePlayer(p.name+' 替身一',pos1,'stand',p.id);insertSummon(p,a);const pos2=findFreeSpot(p.x+45,p.y),b=makePlayer(p.name+' 替身二',pos2,'stand',p.id);insertSummon(p,b);text(p,'替身召喚!')}
+function summonClone(p){const c=makePlayer(p.name+' 克隆',findFreeSpot(p.x+45,p.y+45),'clone',p.id);c.skills=p.skills;insertSummon(p,c);text(c,'克隆共享技能!','#60a5fa')}
+function isHighTierSkill(name){return ['skill-ultimate','skill-rainbow','skill-cosmic'].includes(skillTierClass(name))}
+function useTargetSkill(target){if(!usingSkill||gameOver||animating)return;const user=players[current];if(usingSkill.name==='淨化'||usingSkill.name==='失落的十字架'){applyTargetSkill(user,target,usingSkill);return}if(usingSkill.name==='魔術師'){if(target.dead||target.hiddenOut)return;selectObjectForMove('player',target);return}if(target.dead||target.hiddenOut)return;if(usingSkill.name==='瞬間移動'){teleportTarget=target;text(target,'選位置');return}if(target===user)return;if(sameTeam(user,target)&&!['淨化','失落的十字架'].includes(usingSkill.name)){text(user,'不能指定同隊!','#93c5fd');return}if(hasSkill(target,'防護罩')&&!isHighTierSkill(usingSkill.name)){pendingShield={target,user,skill:{...usingSkill}};shieldText.textContent=target.name+' 要不要使用防護罩擋下「'+usingSkill.name+'」？';shieldBox.style.display='block';return}applyTargetSkill(user,target,usingSkill)}
+function shieldAnswer(use){if(!pendingShield)return;const {target,user,skill}=pendingShield;shieldBox.style.display='none';pendingShield=null;if(use){removeSkillByName(target,'防護罩');text(target,'防護罩擋下!');finishSkill();render();return}applyTargetSkill(user,target,skill)}
+function floatingTextAt(x,y,msg,color='white'){
+  const t=document.createElement('div');
+  t.className='fxText';
+  t.textContent=msg;
+  t.style.left=x+'px';
+  t.style.top=y+'px';
+  t.style.color=color;
+  world.appendChild(t);
+  setTimeout(()=>t.remove(),900);
+}
+function skillHitEffect(target){
+  ring(target.x+R,target.y+R);
+  floatingTextAt(target.x-8,target.y-46,'技能命中!','#facc15');
+}
+
+function copyHandSkill(cardIndex){
+  const p=players[current];
+  if(!usingSkill||usingSkill.name!=='時間水晶'||!usingSkill.copyHand)return false;
+  if(cardIndex===usingSkill.index){text(p,'不能複製時間水晶自己','#67e8f9');return true}
+  const target=p.skills[cardIndex];
+  if(!target){return true}
+  const copy={...target};
+  p.skills.push(copy);
+  p.skills.splice(usingSkill.index,1);
+  usingSkill=null;
+  text(p,'複製：'+target.name,'#67e8f9');
+  log(p.name+' 用時間水晶複製了 '+target.name+'。');
+  render();
+  return true;
+}
+
+
+function rerollHandSkill(cardIndex){
+  const p=players[current];
+  if(!usingSkill||usingSkill.name!=='時間水晶'||!usingSkill.rerollHand)return false;
+  if(cardIndex===usingSkill.index){text(p,'不能重抽時間水晶自己','#67e8f9');return true}
+  const old=p.skills[cardIndex];
+  if(!old)return true;
+  const owned=new Set(p.skills.map(x=>x.name));
+  owned.delete(old.name);
+  owned.delete('時間水晶');
+  const pool=skills.filter(sk=>!sk.passive && !isDrawLockedSkill(sk.name) && !owned.has(sk.name) && sk.name!==old.name && sk.name!=='時間水晶');
+  if(pool.length===0){text(p,'沒有可重抽技能','#f87171');return true}
+  const fresh={...pool[Math.floor(Math.random()*pool.length)]};
+  const crystalIndex=usingSkill.index;
+  p.skills[cardIndex]=fresh;
+  if(crystalIndex>cardIndex)p.skills.splice(crystalIndex,1);else p.skills.splice(crystalIndex,1);
+  usingSkill=null;
+  text(p,'重抽：'+old.name+' → '+fresh.name,'#67e8f9');
+  log(p.name+' 用時間水晶把 '+old.name+' 重抽成 '+fresh.name+'。');
+  render();
+  return true;
+}
+
+function applyTargetSkill(user,target,skill){skillHitEffect(target);if(skill.name==='淨化'){if(skill.cleanseTargets&&skill.cleanseTargets.includes(target.id)){text(target,'已選過!','#86efac');return}if(skill.cleanseTargets)skill.cleanseTargets.push(target.id);holyEffect(target);if(target.dead){reviveAsAlly(target,user)}else{clearBadEffects(target);text(target,'淨化完成!','#86efac')}log('淨化已作用於 '+target.name+'，可繼續選其他人，或按完成淨化。');checkWin();render();return}if(skill.name==='失落的十字架'){if(!target.dead){text(user,'只能復活淘汰者!','#f87171');return}reviveAsAlly(target,user);text(target,'十字架復活!','#93c5fd');finishSkill();checkWin();autoNext();return}if(skill.name==='高壓電'){applyEffect(target,'stun',1);applyEffect(target,'skip',1);text(target,'麻痺停動!')}if(skill.name==='暴衝'){const r=Math.random();let mult=9.5,msg='暴衝準備！950%',col='orange';if(r<.2){mult=7;msg='小暴衝準備！700%';col='#22c55e'}else if(r>.7){mult=12;msg='憤怒暴衝！！1200%';col='#ef4444'}applyEffect(target,'boost',mult);text(target,msg,col);log(user.name+' 對 '+target.name+' 使用暴衝：'+Math.round(mult*100)+'%。')}if(skill.name==='冷凍致傷'){applyEffect(target,'freeze',10);text(target,'冷凍致傷❄️')}if(skill.name==='交換'){const x=user.x,y=user.y;user.x=target.x;user.y=target.y;target.x=x;target.y=y;text(user,'交換!');text(target,'交換!')}if(skill.name==='時空支配'){if(target===user){text(user,'不能指定自己!','#f87171');return}timeReverseAnimation(target,(target.prevRoundStartX??target.spawnX),(target.prevRoundStartY??target.spawnY));text(target,'被時空支配!','#93c5fd')}if(skill.name==='導電'){if(!usingSkill.conductTargets)usingSkill.conductTargets=[];if(usingSkill.conductTargets.includes(target)){text(target,'已被導電!');return}usingSkill.conductTargets.push(target);text(target,'導電標記⚡','#fde047');if(usingSkill.conductTargets.length<2){log('導電：請選第 2 個目標');render();return}else{conductLinks.push({a:usingSkill.conductTargets[0].id,b:usingSkill.conductTargets[1].id,ttl:2})}}if(skill.name==='瘟疫'){const maxTargets=isDuel()?1:2;if(plagueTargets.includes(target)){text(target,'已感染!');return}applyEffect(target,'plague',5,user.id);updatePlagueColor(target);text(target,'感染!');plagueTargets.push(target);if(plagueTargets.length<maxTargets){log('瘟疫：請選第 2 個目標');render();return}}const cost=skill.priority==='⭕圈圈級';finishSkill();plagueTargets=[];checkWin();if(cost)autoNext();else render()}
+function applyEffect(target,type,value,casterId=null){const affected=[target];if(target.kind==='main'||target.kind==='clone')players.forEach(t=>{if(t.masterId===target.id&&t.kind==='stand'&&!t.dead)affected.push(t)});affected.forEach(t=>{if(type==='stun')t.stun=value;if(type==='skip')t.skip=value;if(type==='boost')t.boost=value;if(type==='plague'){t.plague=value;t.plagueCaster=casterId;updatePlagueColor(t)}if(type==='freeze'){t.freeze=value;t.foreverFreeze=false}})}
+function playShockwave(x,y){const sw=document.createElement('div');sw.className='shockwave';sw.style.left=x+'px';sw.style.top=y+'px';world.appendChild(sw);setTimeout(()=>sw.remove(),700)}
+function shockwave(p){playShockwave(p.x+R,p.y+R);text(p,'衝擊波!');for(const t of players){if(t===p||t.dead||t.hiddenOut)continue;let dx=(t.x+R)-(p.x+R),dy=(t.y+R)-(p.y+R),d=Math.hypot(dx,dy);if(d<230){if(d===0){dx=1;dy=0;d=1}t.vx+=dx/d*14;t.vy+=dy/d*14;text(t,'被炸飛!')}}}
+
+function screenShake(){document.body.classList.remove('screenShake');void document.body.offsetWidth;document.body.classList.add('screenShake');setTimeout(()=>document.body.classList.remove('screenShake'),420)}
+function burstParticles(x,y,color='#86efac',count=26){for(let i=0;i<count;i++){const p=document.createElement('div');p.className='ultimateParticle';p.style.left=x+'px';p.style.top=y+'px';p.style.background=color;p.style.boxShadow='0 0 12px '+color+',0 0 22px '+color;const a=Math.random()*Math.PI*2,d=45+Math.random()*90;p.style.setProperty('--dx',Math.cos(a)*d+'px');p.style.setProperty('--dy',Math.sin(a)*d+'px');world.appendChild(p);setTimeout(()=>p.remove(),780)}}
+function ultimateBeamAt(player,color='#86efac'){const b=document.createElement('div');b.className='ultimateBeam';b.style.left=(player.x+R)+'px';b.style.top=(player.y+R)+'px';b.style.background='linear-gradient(to top,rgba(34,197,94,0),'+color+',rgba(34,197,94,0))';world.appendChild(b);setTimeout(()=>b.remove(),930)}
+function playUltimateIntro(user,skillName){const overlay=document.getElementById('ultimateOverlay');if(!overlay)return;const title=overlay.querySelector('.ultimateBanner');title.textContent='━━━━━━━━━\n終極技能！\n'+skillName+'\n━━━━━━━━━';overlay.classList.remove('show');void overlay.offsetWidth;overlay.classList.add('show');ultimateBeamAt(user,skillName==='魔術師'?'#c084fc':'#bbf7d0');burstParticles(user.x+R,user.y+R,skillName==='魔術師'?'#c084fc':'#86efac',34);screenShake();setTimeout(()=>overlay.classList.remove('show'),980)}
+function holyEffect(target){const x=target.x+R,y=target.y+R;const c=document.createElement('div');c.className='holyCircle';c.style.left=(x-41)+'px';c.style.top=(y-41)+'px';world.appendChild(c);const ray=document.createElement('div');ray.className='holyRay';ray.style.left=(x-8)+'px';ray.style.top=(y-120)+'px';world.appendChild(ray);burstParticles(x,y,'#fde68a',18);setTimeout(()=>{c.remove();ray.remove()},820)}
+function magicEffectAt(x,y){const c=document.createElement('div');c.className='magicCircle';c.style.left=(x-51)+'px';c.style.top=(y-51)+'px';world.appendChild(c);const poof=document.createElement('div');poof.className='magicPoof';poof.style.left=(x-13)+'px';poof.style.top=(y-13)+'px';world.appendChild(poof);burstParticles(x,y,'#c084fc',20);setTimeout(()=>{c.remove();poof.remove()},860)}
+function finishCleanseSkill(){if(usingSkill&&usingSkill.name==='淨化'){text(players[current],'洗禮結束','#fef08a');finishSkill();checkWin();autoNext()}}
+
+function autoNext(){actionStarted=true;setTimeout(()=>{actionStarted=false;checkWin();if(!gameOver)nextTurn()},600)}
+function consumeSkillAt(p,i,force=false){if(!p||i==null||i<0||i>=p.skills.length)return;const s=p.skills[i];if(!s)return;if(!force&&s.uses==='∞')return;if(!force&&typeof s.uses==='number'&&s.uses>1){s.uses--;s.desc=s.desc.replace(/，?剩餘\d+次/g,'')+'，剩餘'+s.uses+'次';return}p.skills.splice(i,1)}
+function removeSkill(i){consumeSkillAt(players[current],i,false);render()}
+function finishSkill(){if(usingSkill)consumeSkillAt(players[current],usingSkill.index,!!usingSkill.forceRemove);usingSkill=null;teleportTarget=null}
+function checkWin(){const alive=players.filter(p=>!p.dead),hidden=players.filter(p=>p.hiddenOut&&!p.dead),groups=aliveGroups();if(alive.length===0){gameOver=true;winnerText.textContent='💀 雙殺！無人生還';winBox.style.display='block';log('雙殺！無人生還');return}if(hidden.length>0&&groups.length<=1){checkNeedHiddenReturn();return}if(groups.length===1){const gid=groups[0],winner=players.find(p=>!p.dead&&groupId(p)===gid);gameOver=true;winnerText.textContent='🏆 '+winner.name+' 勝利！';winBox.style.display='block';log(winner.name+' 勝利!');return}checkDuel()}
+function freezeIcon(p){
+  if(p.foreverFreeze)return '🧊';
+  if(p.freeze>0&&p.freeze<=10)return '🔵❄'+p.freeze;
+  if(p.freeze>10)return '❄'+p.freeze;
+  return '';
+}
+function getStatusText(p){return(hasSkill(p,'防護罩')?'🛡':'')+(hasSkill(p,'復活')?'❤️':'')+(hasSkill(p,'時空回溯')?'⏪':'')+(p.killer?'🗡':'')+(p.hiddenOut?'👻':'')+(p.plague>0?'☠'+p.plague:'')+(p.stun>0?'⚡':'')+(p.skip>0?'⛔':'')+(p.boost>0?'💨':'')+freezeIcon(p)+(p.anchor?'⚓':'')+(p.domain?'◯':'')+(p.butcher?'🪓':'')+(p.kind==='stand'?'替':'')+(p.kind==='clone'?'克':'')}
+
+function skillTierClass(name){
+ const normal=['衝擊波','瞬間移動','交換','瘟疫','全部不准動'];
+ const enhance=['殺手','防護罩','復活','解藥','替身','暴衝','克隆','錨點','搬運工','失落的十字架'];
+ const calm=['高壓電','保護色','時空回溯','冷凍致傷','絕對領域','導電'];
+ const crystal=['時間水晶','複製水晶'];
+ const ultimate=['淨化','魔術師','屠夫','時空支配','D4C'];
+ if(normal.includes(name)) return 'skill-normal';
+ if(enhance.includes(name)) return 'skill-enhance';
+ if(calm.includes(name)) return 'skill-calm';
+ if(crystal.includes(name)) return 'skill-crystal';
+ if(ultimate.includes(name)) return 'skill-ultimate';
+ return 'skill-normal';
+}
+function skillTierLabel(name){
+ const cls=skillTierClass(name);
+ if(cls==='skill-normal')return '🩶 一般';
+ if(cls==='skill-enhance')return '🟣 強化';
+ if(cls==='skill-calm')return '🔵 寧靜';
+ if(cls==='skill-crystal')return '💎 水晶';
+ if(cls==='skill-ultimate')return '🟢 終極';
+ if(cls==='skill-rainbow')return '🌈 彩虹';
+ if(cls==='skill-cosmic')return '🌌 宇宙';
+ return '🩶 一般';
+}
+
+function isDrawLockedSkill(name){
+  return ['淨化','魔術師','屠夫','時空支配','D4C'].includes(name);
+}
+// ===== 技能圖標插畫區 Skill Art =====
+function prettyIcon(name){
+  const art={
+    '防護罩': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#93c5fd"/><stop offset=".48" stop-color="#1e3a8a"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M50 8 L78 20 L72 45 L50 55 L28 45 L22 20 Z" fill="rgba(147,197,253,.22)" stroke="#bfdbfe" stroke-width="4"/><path d="M50 16 L66 24 L62 41 L50 48 L38 41 L34 24 Z" fill="rgba(255,255,255,.14)" stroke="#60a5fa" stroke-width="2"/><circle cx="50" cy="31" r="25" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2"/><text x="50" y="39" text-anchor="middle" font-size="24" font-weight="900" fill="#e0f2fe" stroke="rgba(0,0,0,.55)" stroke-width="2" paint-order="stroke">盾</text></svg>`,
+    '高壓電': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fef08a"/><stop offset=".48" stop-color="#ca8a04"/><stop offset="1" stop-color="#0f172a"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path class="skillArtShake" d="M52 5 L30 34 H47 L40 57 L72 24 H54 Z" fill="#fde047" stroke="#fff7ad" stroke-width="3"/><path class="skillArtPulse" d="M18 18 L30 25 L18 31 M78 12 L68 24 L83 25 M21 47 L35 42 M73 47 L62 39" stroke="#fff7ad" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+    '殺手': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#581c87"/><stop offset=".48" stop-color="#1f2937"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M18 50 L70 12 L82 18 L30 55 Z" fill="#e5e7eb" stroke="#fff" stroke-width="3"/><path d="M62 15 L80 6" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle class="skillArtPulse" cx="81" cy="7" r="7" fill="#fff"/><path d="M17 50 L30 55 L25 59 L12 54 Z" fill="#111827" stroke="#c084fc" stroke-width="2"/></svg>`,
+    '復活': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fde68a"/><stop offset=".48" stop-color="#15803d"/><stop offset="1" stop-color="#052e16"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="31" r="23" fill="rgba(255,255,255,.13)" stroke="#fef3c7" stroke-width="3"/><path class="skillArtPulse" d="M50 11 V50 M32 30 H68" stroke="#fde68a" stroke-width="8" stroke-linecap="round"/><path d="M24 48 C34 38 66 38 76 48" stroke="#86efac" stroke-width="4" fill="none"/></svg>`,
+    '保護色': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#dbeafe"/><stop offset=".48" stop-color="#075985"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path class="skillArtFlow" d="M5 18 C22 8 39 28 56 16 S84 8 99 20" stroke="rgba(224,242,254,.7)" stroke-width="5" fill="none"/><path d="M50 12 C67 13 73 52 50 52 C27 52 33 13 50 12Z" fill="rgba(255,255,255,.16)" stroke="#bae6fd" stroke-width="3"/><circle cx="43" cy="31" r="3" fill="#e0f2fe"/><circle cx="57" cy="31" r="3" fill="#e0f2fe"/></svg>`,
+    '衝擊波': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#86efac"/><stop offset=".48" stop-color="#047857"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle class="skillArtPulse" cx="50" cy="30" r="10" fill="#bbf7d0"/><circle cx="50" cy="30" r="21" fill="none" stroke="#22c55e" stroke-width="5"/><circle cx="50" cy="30" r="34" fill="none" stroke="rgba(187,247,208,.55)" stroke-width="4"/><path d="M5 30 H23 M77 30 H95 M50 2 V17 M50 43 V58" stroke="#dcfce7" stroke-width="4"/></svg>`,
+    '瞬間移動': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#93c5fd"/><stop offset=".48" stop-color="#312e81"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="25" fill="none" stroke="#93c5fd" stroke-width="5"/><path class="skillArtSpin" d="M50 7 A23 23 0 0 1 73 30 A23 23 0 0 1 35 47" fill="none" stroke="#c4b5fd" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="30" r="7" fill="#dbeafe"/></svg>`,
+    '交換': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fecaca"/><stop offset=".48" stop-color="#1d4ed8"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M22 20 H70 L62 12 M70 20 L62 28" stroke="#fca5a5" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M78 40 H30 L38 32 M30 40 L38 48" stroke="#93c5fd" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`,
+    '瘟疫': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#86efac"/><stop offset=".48" stop-color="#166534"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="20" fill="rgba(34,197,94,.35)" stroke="#bbf7d0" stroke-width="3"/><circle class="skillArtPulse" cx="35" cy="18" r="5" fill="#a3e635"/><circle class="skillArtPulse" cx="68" cy="44" r="6" fill="#22c55e"/><path d="M40 34 C45 43 55 43 60 34" stroke="#dcfce7" stroke-width="4" fill="none"/><circle cx="43" cy="27" r="3" fill="#052e16"/><circle cx="57" cy="27" r="3" fill="#052e16"/></svg>`,
+    '解藥': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#c4b5fd"/><stop offset=".48" stop-color="#0e7490"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M42 10 H58 V21 L72 46 Q74 54 64 54 H36 Q26 54 28 46 L42 21 Z" fill="rgba(255,255,255,.18)" stroke="#e9d5ff" stroke-width="3"/><path d="M34 44 H66" stroke="#67e8f9" stroke-width="8"/><circle class="skillArtPulse" cx="50" cy="39" r="8" fill="#a7f3d0"/></svg>`,
+    '時空回溯': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#bfdbfe"/><stop offset=".48" stop-color="#1e3a8a"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="25" fill="none" stroke="#93c5fd" stroke-width="4"/><path class="skillArtSpin" d="M50 30 L50 13 M50 30 L65 38" stroke="#dbeafe" stroke-width="5" stroke-linecap="round"/><path d="M31 17 C21 27 24 43 38 50 M31 17 H17 V31" stroke="#bae6fd" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`,
+    '全部不准動': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fecaca"/><stop offset=".48" stop-color="#991b1b"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="25" fill="rgba(239,68,68,.18)" stroke="#fecaca" stroke-width="5"/><path d="M32 30 H68" stroke="#fee2e2" stroke-width="8" stroke-linecap="round"/><path class="skillArtPulse" d="M16 10 L84 50" stroke="#ef4444" stroke-width="5"/></svg>`,
+    '全部不可動': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fecaca"/><stop offset=".48" stop-color="#991b1b"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="25" fill="rgba(239,68,68,.18)" stroke="#fecaca" stroke-width="5"/><path d="M32 30 H68" stroke="#fee2e2" stroke-width="8" stroke-linecap="round"/><path class="skillArtPulse" d="M16 10 L84 50" stroke="#ef4444" stroke-width="5"/></svg>`,
+    '替身': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#ddd6fe"/><stop offset=".48" stop-color="#5b21b6"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="38" cy="30" r="16" fill="rgba(255,255,255,.2)" stroke="#e9d5ff" stroke-width="3"/><circle cx="62" cy="30" r="16" fill="rgba(255,255,255,.12)" stroke="#c084fc" stroke-width="3"/><path d="M20 52 C32 40 68 40 80 52" stroke="#ddd6fe" stroke-width="4" fill="none"/></svg>`,
+    '暴衝': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fed7aa"/><stop offset=".48" stop-color="#c2410c"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path class="skillArtFlow" d="M8 18 H55 M5 30 H72 M12 43 H60" stroke="#fdba74" stroke-width="6" stroke-linecap="round"/><path d="M58 12 L86 30 L58 48 Z" fill="#f97316" stroke="#ffedd5" stroke-width="3"/><path class="skillArtPulse" d="M26 30 H65" stroke="#fef3c7" stroke-width="4"/></svg>`,
+    '克隆': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#a7f3d0"/><stop offset=".48" stop-color="#047857"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M25 50 C45 15 55 45 75 10" stroke="#bbf7d0" stroke-width="5" fill="none"/><path d="M25 10 C45 45 55 15 75 50" stroke="#5eead4" stroke-width="5" fill="none"/><circle cx="34" cy="26" r="4" fill="#ecfeff"/><circle cx="66" cy="34" r="4" fill="#ecfeff"/></svg>`,
+    '冷凍致傷': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#e0f2fe"/><stop offset=".48" stop-color="#0284c7"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path class="skillArtSpin" d="M50 8 V52 M18 30 H82 M27 13 L73 47 M73 13 L27 47" stroke="#e0f2fe" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="30" r="11" fill="#bae6fd" stroke="#fff" stroke-width="3"/></svg>`,
+    '錨點': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#cbd5e1"/><stop offset=".48" stop-color="#334155"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M50 11 V44" stroke="#e2e8f0" stroke-width="7" stroke-linecap="round"/><circle cx="50" cy="16" r="7" fill="none" stroke="#e2e8f0" stroke-width="4"/><path d="M27 36 C30 52 70 52 73 36 M27 36 L18 42 M73 36 L82 42" stroke="#94a3b8" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`,
+    '地雷': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fca5a5"/><stop offset=".48" stop-color="#1f2937"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="35" r="19" fill="#050505" stroke="#64748b" stroke-width="4"/><circle class="skillArtPulse" cx="50" cy="35" r="7" fill="#ef4444"/><path d="M38 16 H62 M50 16 V8" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/></svg>`,
+    '淨化': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fef3c7"/><stop offset=".48" stop-color="#16a34a"/><stop offset="1" stop-color="#052e16"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle class="skillArtPulse" cx="50" cy="30" r="25" fill="rgba(254,243,199,.18)" stroke="#fef9c3" stroke-width="4"/><path d="M50 9 V51 M30 30 H70" stroke="#fef9c3" stroke-width="8" stroke-linecap="round"/><path d="M24 50 C34 38 66 38 76 50" stroke="#86efac" stroke-width="5" fill="none"/></svg>`,
+    '搬運工': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fde68a"/><stop offset=".48" stop-color="#92400e"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><rect x="28" y="25" width="44" height="27" rx="4" fill="#b45309" stroke="#fef3c7" stroke-width="3"/><path d="M28 35 H72 M50 25 V52" stroke="#facc15" stroke-width="3"/><path d="M50 8 V25 M39 13 H61" stroke="#fde68a" stroke-width="5" stroke-linecap="round"/></svg>`,
+    '魔術師': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#e9d5ff"/><stop offset=".48" stop-color="#581c87"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><ellipse cx="50" cy="42" rx="32" ry="8" fill="#1e1b4b" stroke="#e9d5ff" stroke-width="3"/><path d="M35 38 L41 13 H59 L65 38 Z" fill="#4c1d95" stroke="#f5d0fe" stroke-width="3"/><circle class="skillArtPulse" cx="50" cy="22" r="15" fill="none" stroke="#c084fc" stroke-width="3"/></svg>`,
+    '失落的十字架': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#93c5fd"/><stop offset=".48" stop-color="#111827"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M50 8 V54 M32 26 H68" stroke="#dbeafe" stroke-width="8" stroke-linecap="round"/><path class="skillArtPulse" d="M38 50 C42 38 58 38 62 50" stroke="#60a5fa" stroke-width="5" fill="none"/><circle cx="50" cy="32" r="24" fill="none" stroke="rgba(147,197,253,.35)" stroke-width="3"/></svg>`,
+    '時間水晶': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#cffafe"/><stop offset=".48" stop-color="#0891b2"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M50 6 L72 24 L64 54 H36 L28 24 Z" fill="rgba(207,250,254,.28)" stroke="#ecfeff" stroke-width="4"/><path class="skillArtPulse" d="M50 18 V35 L61 41" stroke="#ecfeff" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M31 25 H69" stroke="rgba(255,255,255,.45)" stroke-width="3"/></svg>`,
+    '複製水晶': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#ddd6fe"/><stop offset=".48" stop-color="#0e7490"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M40 7 L60 7 L75 28 L50 55 L25 28 Z" fill="rgba(221,214,254,.23)" stroke="#e0f2fe" stroke-width="4"/><path d="M35 23 H55 V43 H35 Z M48 16 H68 V36 H48 Z" fill="rgba(255,255,255,.16)" stroke="#a5f3fc" stroke-width="3"/></svg>`,
+    '屠夫': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fecaca"/><stop offset=".48" stop-color="#7f1d1d"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M28 10 L76 47" stroke="#e5e7eb" stroke-width="8" stroke-linecap="round"/><path d="M67 40 L83 54" stroke="#7f1d1d" stroke-width="9" stroke-linecap="round"/><path class="skillArtPulse" d="M20 48 C38 36 62 34 80 16" stroke="#ef4444" stroke-width="4" fill="none"/></svg>`,
+    '時空支配': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#bfdbfe"/><stop offset=".48" stop-color="#064e3b"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="25" fill="rgba(255,255,255,.1)" stroke="#bbf7d0" stroke-width="4"/><circle class="skillArtSpin" cx="50" cy="30" r="18" fill="none" stroke="#93c5fd" stroke-width="3" stroke-dasharray="4 5"/><path d="M50 30 L50 12 M50 30 L66 39" stroke="#ecfeff" stroke-width="5" stroke-linecap="round"/><path class="skillArtPulse" d="M20 12 L80 50" stroke="#22c55e" stroke-width="3"/></svg>`,
+    '絕對領域': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#e0f2fe"/><stop offset=".48" stop-color="#0369a1"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle class="skillArtPulse" cx="50" cy="30" r="26" fill="rgba(125,211,252,.12)" stroke="#bae6fd" stroke-width="5"/><circle cx="50" cy="30" r="14" fill="rgba(255,255,255,.16)" stroke="#7dd3fc" stroke-width="3"/><path class="skillArtSpin" d="M50 4 A26 26 0 0 1 76 30" stroke="#e0f2fe" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`,
+    '導電': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#fef08a"/><stop offset=".48" stop-color="#0e7490"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="28" cy="30" r="11" fill="#fef3c7" stroke="#fde047" stroke-width="3"/><circle cx="72" cy="30" r="11" fill="#fef3c7" stroke="#fde047" stroke-width="3"/><path class="skillArtPulse" d="M39 30 L48 20 L52 39 L61 30" stroke="#fff7ad" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`,
+    'D4C': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#ddd6fe"/><stop offset=".48" stop-color="#312e81"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><path d="M20 9 L80 51 M80 9 L20 51" stroke="rgba(196,181,253,.45)" stroke-width="4"/><circle cx="38" cy="30" r="15" fill="rgba(255,255,255,.18)" stroke="#c4b5fd" stroke-width="3"/><circle cx="62" cy="30" r="15" fill="rgba(255,255,255,.1)" stroke="#a78bfa" stroke-width="3"/><path class="skillArtPulse" d="M50 5 L50 55" stroke="#f5d0fe" stroke-width="3"/></svg>`,
+    'default': `<svg class="skillArtSvg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="g" cx="35%" cy="30%"><stop offset="0" stop-color="#cbd5e1"/><stop offset=".48" stop-color="#334155"/><stop offset="1" stop-color="#020617"/></radialGradient></defs><rect width="100" height="60" rx="10" fill="url(#g)"/><circle cx="50" cy="30" r="24" fill="rgba(255,255,255,.12)" stroke="#e5e7eb" stroke-width="4"/><text x="50" y="40" text-anchor="middle" font-size="28" font-weight="900" fill="#fff" stroke="rgba(0,0,0,.55)" stroke-width="2" paint-order="stroke">技</text></svg>`
+  };
+  return art[name] || art['default'];
+}
+
+function render(){updateDomains();players.forEach((p,i)=>{updateAnchorMarker(p);if(p.plague>0)updatePlagueColor(p);if(p.plague===0&&!p.dead)p.el.style.background='white';p.el.style.left=p.x+'px';p.el.style.top=p.y+'px';p.el.className='cap'+(p.kind==='clone'?' cloneCap':'')+(p.kind==='stand'?' standCap':'')+(p.dead?' dead':'')+(p.hiddenOut?' hidden':'')+(i===current&&!p.dead&&!p.hiddenOut?' current':'');p.el.textContent=p.name;p.statusEl.style.left=(p.x+36)+'px';p.statusEl.style.top=(p.y-8)+'px';p.statusEl.textContent=getStatusText(p);p.statusEl.style.display=p.dead?'none':'block'});const p=players[current];turnText.textContent='第 '+round+' 輪｜'+p.name+(round===1?'｜禁殺':'')+(p.stun>0?'｜禁技':'')+(movedThisTurn?'｜已移動':'');panel.innerHTML='<div id="skillCards"></div><div id="synthBox" class="synthBox"><b>合成欄</b><div class="synthList">'+(synthSlots.length?synthSlots.join(' + '):'空')+'</div><div class="synthHint" style="display:none"></div>'+(synthSlots.length?'<button class="synthBtn" onclick="clearSynthesis()">清空</button>':'')+(usingSkill&&(usingSkill.name==='搬運工'||usingSkill.name==='魔術師')?'<button class="synthBtn" onclick="finishObjectMoveSkill()">完成移動</button>':'')+(usingSkill&&usingSkill.name==='淨化'?'<div class="cleanseFinishLabel">結束洗禮</div><button class="synthBtn" onclick="finishCleanseSkill()">結束洗禮</button>':'')+'</div>';const cards=document.getElementById('skillCards'),box=document.getElementById('synthBox');box.ondragover=ev=>{ev.preventDefault();box.classList.add('dragOver')};box.ondragleave=()=>box.classList.remove('dragOver');box.ondrop=ev=>{ev.preventDefault();box.classList.remove('dragOver');const n=ev.dataTransfer.getData('text/plain');if(n)addToSynthesis(n)};p.skills.forEach((s,i)=>{const passive=s.passive?'<br><span class="passive">🟢被動</span>':'',c=document.createElement('div');c.className='card '+skillTierClass(s.name)+' '+(s.passive?'passiveCard':'usable')+((usingSkill&&usingSkill.index===i&&players[current]===p)?' skillSelected':'');c.draggable=true;c.ondragstart=ev=>{ev.dataTransfer.setData('text/plain',s.name)};if(!s.passive)c.onclick=()=>{if(usingSkill&&usingSkill.name==='時間水晶'&&usingSkill.copyHand){copyHandSkill(i);return}if(usingSkill&&usingSkill.name==='時間水晶'&&usingSkill.rerollHand){rerollHandSkill(i);return}useSkill(i)};c.title=s.desc+'\n'+skillGuide(s.name);c.innerHTML=`<b>${s.name}</b><div class="skillIcon">${prettyIcon(s.name)}</div><div class="skillMeta">${skillTierLabel(s.name)}｜${s.priority}${s.passive?'｜被動':''}｜次數:${s.uses??1}</div><div class="skillDesc">${s.desc}</div><div class="skillTip">${s.passive?'自動觸發':'點擊使用／拖曳合成'}</div>`;cards.appendChild(c)});if(p.skills.length===0)cards.innerHTML='<div class="card">此單位沒有技能<br>只能移動</div>';aiMaybeAct()}
+const recentTextMap=new Map();function text(p,msg,color='white'){const now=Date.now(),key=(p&&p.id?p.id:'world')+'|'+msg;const last=recentTextMap.get(key)||0;if(now-last<850)return;recentTextMap.set(key,now);const t=document.createElement('div');t.className='fxText';t.textContent=msg;t.style.left=(p?p.x:20)+'px';t.style.top=((p?p.y:20)-25)+'px';t.style.color=color;world.appendChild(t);setTimeout(()=>t.remove(),900)}function ring(x,y){const r=document.createElement('div');r.className='ring';r.style.left=(x-45)+'px';r.style.top=(y-45)+'px';r.style.width='90px';r.style.height='90px';world.appendChild(r);setTimeout(()=>r.remove(),600)}
+function backToMenu(){
+  cancelDrag();
+  gameOver=true;
+  animating=false;
+  actionStarted=false;
+  usingSkill=null;
+  pendingShield=null;
+  selectingReturnPlayer=null;
+  teleportTarget=null;
+  minePlacement=null;
+  plagueTargets=[];
+  synthSlots=[];
+  objectMove=null;
+  movedThisTurn=false;
+  document.querySelectorAll('.cap,.status,.fxText,.ring,.obstacle,.anchorMarker,.mine,.lavaZone,.timeTrail,.timeFlash,.shockwave,.mineBoom,.mineSpark,.domainRing,.ultimateBeam,.ultimateParticle,.holyCircle,.holyRay,.magicCircle,.magicPoof,.domainRing').forEach(e=>e.remove());
+  players=[];
+  obstacles=[];
+  mines=[];
+  lavaZones=[];
+  panel.innerHTML='';
+  logBox.innerHTML='';
+  winBox.style.display='none';
+  shieldBox.style.display='none';
+  document.getElementById('help').style.display='none';
+  document.getElementById('skillCatalog').style.display='none';
+  const rp=document.getElementById('rulePage'); if(rp)rp.style.display='none';
+  const cp=document.getElementById('recipePage'); if(cp)cp.style.display='none'; const up=document.getElementById('updatePage'); if(up)up.style.display='none';
+  document.getElementById('drawOverlay').style.display='none';
+  const ms=document.getElementById('mapSelect'); if(ms)ms.style.display='none';
+  document.getElementById('startMenu').style.display='flex';
+}
+
+function aiLevelLabel(level){return {off:'關閉',rookie:'新手',veteran:'老手',hard:'困難',nightmare:'夢魘',boss:'魔王'}[level]||level}
+function applyPendingAI(){const level=pendingAILevel||'off';players.forEach((p,i)=>{p.ai=(i!==0&&level!=='off');p.aiLevel=level});if(players.length)log(level==='off'?'AI 已關閉':'P2~P4 設為 AI：'+aiLevelLabel(level));}
+function toggleAIForOthers(){const sel=document.getElementById('aiDifficulty');pendingAILevel=sel?sel.value:'off';applyPendingAI();render()}
+function aiMaybeAct(){if(gameOver||animating||actionStarted||usingSkill||selectingReturnPlayer||pendingShield)return;const p=players[current];if(!p||!p.ai||p.dead||p.hiddenOut)return;clearTimeout(aiTimer);aiTimer=setTimeout(()=>aiTakeTurn(p),450)}
+function aiTakeTurn(p){if(gameOver||p!==players[current]||animating||actionStarted)return;const targets=players.filter(t=>t!==p&&!t.dead&&!t.hiddenOut&&!sameTeam(p,t));if(!targets.length){nextTurn();return}targets.sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y));const t=targets[0];const dx=(t.x-p.x),dy=(t.y-p.y),dist=Math.hypot(dx,dy)||1;let pull=Math.min(MAX_PULL,Math.max(45,dist*.42));let err={rookie:.45,veteran:.25,hard:.13,nightmare:.06,boss:.025}[p.aiLevel]??.25;let ang=Math.atan2(dy,dx)+(Math.random()*2-1)*err;let multi=1;if(p.aiLevel==='rookie')multi=.75+Math.random()*.45;if(p.aiLevel==='boss')multi=1.05; p.vx=Math.cos(ang)*pull*BASE_POWER*multi;p.vy=Math.sin(ang)*pull*BASE_POWER*multi;movedThisTurn=true;actionStarted=true;animating=true;text(p,'AI 發射!','#93c5fd')}
+function log(t){logBox.innerHTML+='<div>'+t+'</div>';logBox.scrollTop=logBox.scrollHeight}function showHelp(){document.getElementById('help').style.display='block'}function hideHelp(){document.getElementById('help').style.display='none'}window.addEventListener('resize',()=>{try{render()}catch(e){}});restart();gameLoop();
+</script>
+</body>
+</html>
